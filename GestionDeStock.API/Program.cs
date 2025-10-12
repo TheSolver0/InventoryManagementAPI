@@ -1,0 +1,73 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Sqlite;
+using Microsoft.AspNetCore.Builder;
+using GestionDeStock.API.Data;
+using GestionDeStock.API.Middleware;
+using Microsoft.Extensions.Options;
+using NSwag.Generation.Processors.Security; // Add this for NSwag
+using NSwag.AspNetCore; // Add this for NSwag
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    // options.JsonSerializerOptions.PropertyNamingPolicy = null;
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+});
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddDbContext<AppDbContext>(options => 
+    options.UseSqlite("Data Source=GestionDeStockAPP.db"));
+builder.Services.AddOpenApiDocument(config =>
+{
+    config.Title = "GestionDeStock API";
+    config.Version = "v1";
+    config.Description = "API pour un système de gestion de stock.";
+
+});
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowedFrontEnd", policy =>
+    {
+        policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+
+        /*policy.WithOrigins("http://localhost:5173/")
+            .AllowAnyHeader()
+            .AllowAnyMethod();*/
+    });
+});
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseOpenApi();
+    app.UseSwaggerUi();
+}
+
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
+// Logging de requêtes
+app.Use(async (context, next) =>
+{
+    logger.LogInformation("Request: {method} {path}", context.Request.Method, context.Request.Path);
+    await next.Invoke();
+});
+
+app.MapGet("/", () => "Welcome to VoteApp API!").WithOpenApi();
+
+
+app.UseHttpsRedirection();
+app.UseAuthorization();
+app.MapControllers();
+app.UseMiddleware<ErrorHandlingMiddleware>();
+app.UseCors("AllowedFrontEnd");
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await AppDbContextSeeder.SeedAsync(context);
+}
+
+app.Run();
+
