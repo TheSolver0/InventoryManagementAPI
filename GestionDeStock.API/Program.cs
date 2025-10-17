@@ -5,14 +5,17 @@ using GestionDeStock.API.Data;
 using GestionDeStock.API.Middleware;
 using Microsoft.Extensions.Options;
 using NSwag.Generation.Processors.Security; // Add this for NSwag
-using NSwag.AspNetCore; // Add this for NSwag
+using NSwag.AspNetCore;
+using System.Text.Json.Serialization; // Add this for NSwag
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     // options.JsonSerializerOptions.PropertyNamingPolicy = null;
-    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddDbContext<AppDbContext>(options => 

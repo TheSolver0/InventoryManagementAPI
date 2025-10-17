@@ -9,7 +9,7 @@ namespace GestionDeStock.API.Dtos
         public required string Address { get; set; }
         public required int Telephone { get; set; }
         public required int Delay { get; set; }
-        public required List<Product> Products { get; set; }
+        public required List<int> Products { get; set; }
        
     }
 }

@@ -44,7 +44,10 @@ namespace GestionDeStock.API.Controllers
                     Address = supplier.Address,
                     Telephone = supplier.Telephone,
                     Delay = supplier.Delay,
-                    Products = supplier.Products
+                    Products = await _context.Products
+            .Where(p => supplier.Products.Contains(p.Id))
+            .ToListAsync()
+
 
                 };
                 _context.Suppliers.Add(newSupplier);

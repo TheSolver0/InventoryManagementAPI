@@ -2,6 +2,7 @@
 using GestionDeStock.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GestionDeStock.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251017215713_ModifyMontantToAmountAddOrderTable")]
+    partial class ModifyMontantToAmountAddOrderTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.9");
@@ -88,8 +91,6 @@ namespace GestionDeStock.API.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.HasIndex("ProductId");
-
                     b.ToTable("Orders");
                 });
 
@@ -110,6 +111,9 @@ namespace GestionDeStock.API.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("OrderId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<decimal>("Price")
                         .HasColumnType("TEXT");
 
@@ -125,6 +129,8 @@ namespace GestionDeStock.API.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("OrderId");
 
                     b.HasIndex("SupplierId");
 
@@ -168,15 +174,7 @@ namespace GestionDeStock.API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GestionDeStock.API.Models.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Customer");
-
-                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("GestionDeStock.API.Models.Product", b =>
@@ -186,6 +184,10 @@ namespace GestionDeStock.API.Migrations
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("GestionDeStock.API.Models.Order", null)
+                        .WithMany("Products")
+                        .HasForeignKey("OrderId");
 
                     b.HasOne("GestionDeStock.API.Models.Supplier", null)
                         .WithMany("Products")
@@ -202,6 +204,11 @@ namespace GestionDeStock.API.Migrations
             modelBuilder.Entity("GestionDeStock.API.Models.Customer", b =>
                 {
                     b.Navigation("Orders");
+                });
+
+            modelBuilder.Entity("GestionDeStock.API.Models.Order", b =>
+                {
+                    b.Navigation("Products");
                 });
 
             modelBuilder.Entity("GestionDeStock.API.Models.Supplier", b =>

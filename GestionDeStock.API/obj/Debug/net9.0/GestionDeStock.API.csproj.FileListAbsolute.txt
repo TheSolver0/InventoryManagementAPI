@@ -162,3 +162,4 @@ D:\Travail\gestiondestockAPI.NET\GestionDeStock.API\obj\Debug\net9.0\refint\Gest
 D:\Travail\gestiondestockAPI.NET\GestionDeStock.API\obj\Debug\net9.0\GestionDeStock.API.pdb
 D:\Travail\gestiondestockAPI.NET\GestionDeStock.API\obj\Debug\net9.0\GestionDeStock.API.genruntimeconfig.cache
 D:\Travail\gestiondestockAPI.NET\GestionDeStock.API\obj\Debug\net9.0\ref\GestionDeStock.API.dll
+D:\Travail\gestiondestockAPI.NET\GestionDeStock.API\obj\Debug\net9.0\GestionDeStock.API.sourcelink.json
