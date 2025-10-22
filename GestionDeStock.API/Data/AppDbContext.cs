@@ -15,6 +15,8 @@ namespace GestionDeStock.API.Data
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<Provide> Provides { get; set; }
+        public DbSet<Movement> Movements { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -30,6 +32,46 @@ namespace GestionDeStock.API.Data
                 .WithMany(c => c.Orders)
                 .HasForeignKey(o => o.CustomerId)
                 .OnDelete(DeleteBehavior.Cascade);
+        }
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            var timestampedEntries = ChangeTracker.Entries()
+                .Where(e => e.Entity is ITimestamped &&
+                           (e.State == EntityState.Added || e.State == EntityState.Modified));
+
+            foreach (var entry in timestampedEntries)
+            {
+                var entity = (ITimestamped)entry.Entity;
+
+                if (entry.State == EntityState.Added)
+                {
+                    entity.CreatedAt = DateTime.UtcNow;
+                }
+
+                entity.UpdatedAt = DateTime.UtcNow;
+            }
+
+            return await base.SaveChangesAsync(cancellationToken);
+        }
+        public override int SaveChanges()
+        {
+            var timestampedEntries = ChangeTracker.Entries()
+                .Where(e => e.Entity is ITimestamped &&
+                           (e.State == EntityState.Added || e.State == EntityState.Modified));
+
+            foreach (var entry in timestampedEntries)
+            {
+                var entity = (ITimestamped)entry.Entity;
+
+                if (entry.State == EntityState.Added)
+                {
+                    entity.CreatedAt = DateTime.UtcNow;
+                }
+
+                entity.UpdatedAt = DateTime.UtcNow;
+            }
+
+            return base.SaveChanges();
         }
 
     }

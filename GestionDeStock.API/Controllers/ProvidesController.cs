@@ -8,55 +8,69 @@ namespace GestionDeStock.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ProductsController : ControllerBase
+    public class ProvidesController : ControllerBase
     {
         private readonly AppDbContext _context;
-        public ProductsController(AppDbContext context)
+        public ProvidesController(AppDbContext context)
         {
             _context = context;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
+        public async Task<ActionResult<IEnumerable<ProvideDto>>> GetProvides()
         {
-            var products = await _context.Products.ToListAsync();
+            var provides = await _context.Provides
+                .Select(o => new ProvideDto
+                {
+                    Id = o.Id,
+                    Quantity = o.Quantity,
+                    Amount = o.Amount,
+                    SupplierId = o.SupplierId,
+                    Supplier = o.Supplier,
+                    ProductId = o.ProductId,
+                    Product = o.Product,
+                    Status = o.Status   
+                })
+                .ToListAsync();
 
-            return Ok(products);
+            return Ok(provides);
         }
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetProduct(int id)
+        public async Task<ActionResult<Provide>> GetProvide(int id)
         {
-            var product = await _context.Products.FindAsync(id);
+            var provide = await _context.Provides.FindAsync(id);
 
-            return Ok(product);
+            return Ok(provide);
         }
         [HttpPost]
-        public IActionResult CreateProduct([FromBody] ProductDto product)
+        public IActionResult CreateProvide([FromBody] ProvideDto provideDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             try
             {
-                var category = _context.Categories.Find(product.CategoryId);
-                if (category == null)
-                    return BadRequest("Catégorie introuvable");
+                var supplier = _context.Suppliers.Find(provideDto.SupplierId);
+                if (supplier == null)
+                    return BadRequest("Fournisseur introuvable");
+                var product = _context.Products.Find(provideDto.ProductId);
+                if (product == null)
+                    return BadRequest("Produit introuvable");
+                var amount = product.Price * provideDto.Quantity;
 
-                var newProduct = new Product
+                var newProvide = new Provide
                 {
-                    Name = product.Name,
-                    Desc = product.Desc,
-                    CategoryId = product.CategoryId,
-                    Quantity = product.Quantity,
-                    Price = product.Price,
-                    Threshold = product.Threshold,
-                    Category = category
-
+                    Quantity = provideDto.Quantity,
+                    Amount = amount,
+                    SupplierId = provideDto.SupplierId,
+                    ProductId = provideDto.ProductId,
+                    Product = product,
+                    Supplier = supplier
                 };
 
-                _context.Products.Add(newProduct);
+                _context.Provides.Add(newProvide);
                 _context.SaveChanges();
 
-                return Ok(newProduct);
+                return Ok(newProvide);
             }
             catch (Exception ex)
             {

@@ -3,6 +3,7 @@ using System;
 using GestionDeStock.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GestionDeStock.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251022152025_AddMovementTable")]
+    partial class AddMovementTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.9");
@@ -79,13 +82,13 @@ namespace GestionDeStock.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<decimal?>("Amount")
-                        .HasColumnType("TEXT");
+                    b.Property<int?>("Amount")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("CustomerId")
+                    b.Property<int>("CustomerId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("ProductId")
@@ -94,7 +97,7 @@ namespace GestionDeStock.API.Migrations
                     b.Property<int?>("Quantity")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("SupplierId")
+                    b.Property<int>("SupplierId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Type")
@@ -275,7 +278,9 @@ namespace GestionDeStock.API.Migrations
                 {
                     b.HasOne("GestionDeStock.API.Models.Customer", "Customer")
                         .WithMany()
-                        .HasForeignKey("CustomerId");
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("GestionDeStock.API.Models.Product", "Product")
                         .WithMany()
@@ -285,7 +290,9 @@ namespace GestionDeStock.API.Migrations
 
                     b.HasOne("GestionDeStock.API.Models.Supplier", "Supplier")
                         .WithMany()
-                        .HasForeignKey("SupplierId");
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Customer");
 

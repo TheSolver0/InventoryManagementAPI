@@ -1,8 +1,8 @@
-using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;    
 
 namespace GestionDeStock.API.Models
 {
-    public class Order
+    public class Order : ITimestamped
     {
         public  int Id { get; set; }
         public OrderType  Type { get; set; } = OrderType.ENTREE;
@@ -13,6 +13,9 @@ namespace GestionDeStock.API.Models
         public int ProductId { get; set; }
         public Product? Product { get; set; }
         public OrderStatus Status { get; set; } = OrderStatus.EN_ATTENTE; 
+        public DateTime CreatedAt { get; set; }
+
+        public DateTime UpdatedAt { get; set; }
 
 
     }

@@ -7,6 +7,6 @@ namespace GestionDeStock.API.Dtos
         public required int CategoryId { get; set; }
         public required int Quantity { get; set; }
         public required decimal Price { get; set; }
-        public required int Seuil { get; set; }
+        public required int Threshold { get; set; }
     }
 }

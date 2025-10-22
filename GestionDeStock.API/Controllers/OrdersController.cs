@@ -29,7 +29,7 @@ namespace GestionDeStock.API.Controllers
                     Customer = o.Customer,
                     ProductId = o.ProductId,
                     Product = o.Product,
-                    Status = o.Status   
+                    Status = o.Status
                 })
                 .ToListAsync();
 
@@ -57,6 +57,8 @@ namespace GestionDeStock.API.Controllers
                     return BadRequest("Produit introuvable");
                 var amount = product.Price * orderDto.Quantity;
 
+                Console.WriteLine("*********Amount calculated: " + amount);
+
                 var newOrder = new Order
                 {
                     Quantity = orderDto.Quantity,
@@ -83,32 +85,57 @@ namespace GestionDeStock.API.Controllers
             }
         }
 
-        [HttpPut]
-        public async Task<IActionResult> UpdateProduct(Product product, int id)
+        [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateOrder([FromBody] OrderDto orderDto, int id)
         {
-            if (id != product.Id)
-                return BadRequest("L'ID du produit ne correspond pas");
-            var existingProduct = await _context.Products.FindAsync(id);
-            if (existingProduct == null)
+            if (id != orderDto.Id)
+                return BadRequest("L'ID de la commande ne correspond pas");
+
+            var existingOrder = await _context.Orders.FindAsync(id);
+            if (existingOrder == null)
                 return NotFound();
 
             // Mise à jour des propriétés
+            existingOrder.Quantity = orderDto.Quantity;
+            existingOrder.CustomerId = orderDto.CustomerId;
+            existingOrder.ProductId = orderDto.ProductId;
+            existingOrder.Status = orderDto.Status;
 
-            existingProduct = product;
+            // Si la commande est livrée, ajuster le stock et enregistrer le mouvement
+            if (existingOrder.Status == OrderStatus.LIVREE)
+            {
+                var product = await _context.Products.FindAsync(existingOrder.ProductId);
+                if (product != null)
+                {
+                    if (product.Quantity < existingOrder.Quantity)
+                        return BadRequest("Stock insuffisant pour livrer cette commande.");
+                    product.Quantity -= existingOrder.Quantity;
+                    existingOrder.Amount = orderDto.Quantity * product.Price;
+                }
 
+                await _context.Movements.AddAsync(new Movement
+                {
+                    Quantity = existingOrder.Quantity,
+                    Amount = existingOrder.Amount,
+                    ProductId = existingOrder.ProductId,
+                    CustomerId = existingOrder.CustomerId,
+                    Type = "Sortie",
+                });
+            }
+
+            // Sauvegarde finale
             await _context.SaveChangesAsync();
 
-            return NoContent();
-
+            return Ok(existingOrder);
         }
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProduct(int id)
+        public async Task<IActionResult> DeleteOrder(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
+            var order = await _context.Orders.FindAsync(id);
+            if (order == null)
                 return NotFound();
 
-            _context.Products.Remove(product);
+            _context.Orders.Remove(order);
             await _context.SaveChangesAsync();
 
             return NoContent();

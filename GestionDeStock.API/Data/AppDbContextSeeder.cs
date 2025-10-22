@@ -24,7 +24,7 @@ namespace GestionDeStock.API.Data
                         Category = cat1,
                         Quantity = 50,
                         Price = 299.99m,
-                        Seuil = 10
+                        Threshold = 10
                     },
                     new Product
                     {
@@ -35,7 +35,7 @@ namespace GestionDeStock.API.Data
                         Category = cat2,
                         Quantity = 200,
                         Price = 2.99m,
-                        Seuil = 30
+                        Threshold = 30
                     }
                 );
 
