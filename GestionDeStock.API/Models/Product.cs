@@ -11,7 +11,9 @@ namespace GestionDeStock.API.Models
         public required decimal Price { get; set; }
         public required int Threshold { get; set; }
         public DateTime CreatedAt { get; set; }
-
         public DateTime UpdatedAt { get; set; }
+        
+        // Navigation property for many-to-many relationship with Supplier
+        public List<Supplier> Suppliers { get; set; } = new();
     }
 }

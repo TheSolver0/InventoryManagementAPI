@@ -60,7 +60,7 @@ namespace GestionDeStock.API.Controllers
                 });
             }
         }
-        [HttpPut]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCustomer(Customer customer, int id)
         {
             if (id != customer.Id)
@@ -71,11 +71,15 @@ namespace GestionDeStock.API.Controllers
 
             // Mise à jour des propriétés
 
-            existingCustomer = customer;
+            existingCustomer.Name = customer.Name;
+            existingCustomer.Email = customer.Email;
+            existingCustomer.Address = customer.Address;
+            existingCustomer.Telephone = customer.Telephone;
+            existingCustomer.Points = customer.Points;
 
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(existingCustomer);
 
         }
         [HttpDelete("{id}")]

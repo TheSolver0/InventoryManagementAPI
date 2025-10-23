@@ -26,12 +26,19 @@ namespace GestionDeStock.API.Data
                 .WithMany(c => c.Products)
                 .HasForeignKey(p => p.CategoryId)
                 .OnDelete(DeleteBehavior.Cascade);
+
             // Customer -> Order (1:N)
             modelBuilder.Entity<Order>()
                 .HasOne(o => o.Customer)
                 .WithMany(c => c.Orders)
                 .HasForeignKey(o => o.CustomerId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Product <-> Supplier (N:M)
+            modelBuilder.Entity<Supplier>()
+                .HasMany(s => s.Products)
+                .WithMany(p => p.Suppliers)
+                .UsingEntity(j => j.ToTable("SupplierProducts"));
         }
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

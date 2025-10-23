@@ -69,7 +69,7 @@ namespace GestionDeStock.API.Controllers
             }
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateProduct(Product product, int id)
         {
             if (id != product.Id)
@@ -78,13 +78,17 @@ namespace GestionDeStock.API.Controllers
             if (existingProduct == null)
                 return NotFound();
 
-            // Mise à jour des propriétés
-
-            existingProduct = product;
+            // Mise à jour des propriétés individuellement
+            existingProduct.Name = product.Name;
+            existingProduct.Desc = product.Desc;
+            existingProduct.CategoryId = product.CategoryId;
+            existingProduct.Quantity = product.Quantity;
+            existingProduct.Price = product.Price;
+            existingProduct.Threshold = product.Threshold;
 
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(existingProduct);
 
         }
         [HttpDelete("{id}")]

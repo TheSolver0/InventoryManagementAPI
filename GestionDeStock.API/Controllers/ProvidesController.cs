@@ -29,7 +29,7 @@ namespace GestionDeStock.API.Controllers
                     Supplier = o.Supplier,
                     ProductId = o.ProductId,
                     Product = o.Product,
-                    Status = o.Status   
+                    Status = o.Status
                 })
                 .ToListAsync();
 
@@ -83,32 +83,79 @@ namespace GestionDeStock.API.Controllers
             }
         }
 
-        [HttpPut]
-        public async Task<IActionResult> UpdateProduct(Product product, int id)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProvide([FromBody] ProvideDto provideDto, int id)
         {
-            if (id != product.Id)
-                return BadRequest("L'ID du produit ne correspond pas");
-            var existingProduct = await _context.Products.FindAsync(id);
-            if (existingProduct == null)
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var existingProvide = await _context.Provides.FindAsync(id);
+            if (existingProvide == null)
                 return NotFound();
 
-            // Mise à jour des propriétés
+            try
+            {
+                /*var supplier = _context.Suppliers.Find(provideDto.SupplierId);
+                if (supplier == null)
+                    return BadRequest("Fournisseur introuvable");
+                var product = _context.Products.Find(provideDto.ProductId);
+                if (product == null)
+                    return BadRequest("Produit introuvable");
+                var amount = product.Price * provideDto.Quantity;*/
 
-            existingProduct = product;
 
-            await _context.SaveChangesAsync();
+                existingProvide.Quantity = provideDto.Quantity;
+                // existingProvide.Amount = amount;
+                existingProvide.SupplierId = provideDto.SupplierId;
+                existingProvide.ProductId = provideDto.ProductId;
+                // existingProvide.Product = product;
+                // existingProvide.Supplier = supplier;
+                existingProvide.Status = provideDto.Status;
+                // Si la commande est livrée, ajuster le stock et enregistrer le mouvement
+                if (existingProvide.Status == ProvideStatus.LIVREE)
+                {
+                    var product = await _context.Products.FindAsync(existingProvide.ProductId);
+                    if (product != null)
+                    {
+                        if (product.Quantity < existingProvide.Quantity)
+                            return BadRequest("Stock insuffisant pour livrer cette commande.");
+                        product.Quantity += existingProvide.Quantity;
+                        existingProvide.Amount = provideDto.Quantity * product.Price;
+                    }
 
-            return NoContent();
+                    await _context.Movements.AddAsync(new Movement
+                    {
+                        Quantity = existingProvide.Quantity,
+                        Amount = existingProvide.Amount,
+                        ProductId = existingProvide.ProductId,
+                        SupplierId = existingProvide.SupplierId,
+                        Type = "Entrée",
+                    });
+                }
 
+
+                // _context.Provides.Add(newProvide);
+                _context.SaveChanges();
+
+                return Ok(existingProvide);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    error = "Erreur lors de l'enregistrement",
+                    details = ex.Message,
+                    inner = ex.InnerException?.Message
+                });
+            }
         }
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProduct(int id)
+        public async Task<IActionResult> DeleteProvide(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
+            var provide = await _context.Provides.FindAsync(id);
+            if (provide == null)
                 return NotFound();
 
-            _context.Products.Remove(product);
+            _context.Provides.Remove(provide);
             await _context.SaveChangesAsync();
 
             return NoContent();
