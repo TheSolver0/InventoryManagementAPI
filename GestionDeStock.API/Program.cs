@@ -47,6 +47,12 @@ if (app.Environment.IsDevelopment())
     app.UseOpenApi();
     app.UseSwaggerUi();
 }
+// Configuration pour la production
+if (builder.Environment.IsProduction())
+{
+    builder.Configuration.AddEnvironmentVariables();
+}
+
 
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
