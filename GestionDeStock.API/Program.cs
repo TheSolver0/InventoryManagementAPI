@@ -75,6 +75,11 @@ app.UseCors("AllowedFrontEnd");
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    
+    // Cette méthode crée la base et les tables automatiquement
+    context.Database.EnsureCreated();
+    
+    // Seed des données
     await AppDbContextSeeder.SeedAsync(context);
 }
 
