@@ -1,43 +1,28 @@
-# Étape 1 : Build de l'application
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copier les fichiers projet et restaurer les dépendances
-COPY ["*.csproj", "./"]
-RUN dotnet restore
-
-# Copier le reste du code et build
+# Copier la solution et les projets
 COPY . .
-RUN dotnet publish -c Release -o /app/publish
+RUN dotnet restore "GestionDeStock.API.csproj"
+RUN dotnet publish "GestionDeStock.API.csproj" -c Release -o /app/publish
 
-# Étape 2 : Runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 
-# Installer les dépendances système pour SQLite
+# Installer SQLite
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     sqlite3 \
     libsqlite3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Créer un dossier pour la base de données SQLite
+# Créer dossier pour la base de données
 RUN mkdir -p /app/data
-
-# Créer un utilisateur non-root pour la sécurité (important pour Render)
-RUN groupadd -r appuser && useradd -r -g appuser appuser
-RUN chown -R appuser:appuser /app
-USER appuser
 
 # Copier l'application publiée
 COPY --from=build /app/publish .
 
-# Exposer le port (Render utilise le port 10000 par défaut)
 EXPOSE 10000
+ENV ASPNETCORE_URLS=http://0.0.0.0:10000
 
-# Variable d'environnement pour le port
-ENV ASPNETCORE_URLS=http://*:10000
-ENV ASPNETCORE_ENVIRONMENT=Production
-
-# Point d'entrée
-ENTRYPOINT ["dotnet", "GestionDeStock.Api.dll"]
+ENTRYPOINT ["dotnet", "GestionDeStock.API.dll"]
