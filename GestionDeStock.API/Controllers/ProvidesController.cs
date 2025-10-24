@@ -116,8 +116,7 @@ namespace GestionDeStock.API.Controllers
                     var product = await _context.Products.FindAsync(existingProvide.ProductId);
                     if (product != null)
                     {
-                        if (product.Quantity < existingProvide.Quantity)
-                            return BadRequest("Stock insuffisant pour livrer cette commande.");
+                        
                         product.Quantity += existingProvide.Quantity;
                         existingProvide.Amount = provideDto.Quantity * product.Price;
                     }
