@@ -8,13 +8,9 @@ namespace GestionDeStock.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class SuppliersController : ControllerBase
+    public class SuppliersController(AppDbContext context) : ControllerBase
     {
-        private readonly AppDbContext _context;
-        public SuppliersController(AppDbContext context)
-        {
-            _context = context;
-        }
+        private readonly AppDbContext _context = context;
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Supplier>>> GetSuppliers()
@@ -56,6 +52,7 @@ namespace GestionDeStock.API.Controllers
 
                 var newSupplier = new Supplier
                 {
+                    Id = 0,
                     Name = supplier.Name,
                     Email = supplier.Email,
                     Address = supplier.Address,

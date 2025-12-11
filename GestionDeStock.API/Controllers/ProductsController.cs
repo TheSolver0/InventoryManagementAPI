@@ -31,6 +31,7 @@ namespace GestionDeStock.API.Controllers
             return Ok(product);
         }
         [HttpPost]
+        [ProducesResponseType<Product>(StatusCodes.Status200OK)]
         public IActionResult CreateProduct([FromBody] ProductDto product)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -43,6 +44,7 @@ namespace GestionDeStock.API.Controllers
 
                 var newProduct = new Product
                 {
+                    Id = 0,
                     Name = product.Name,
                     Desc = product.Desc,
                     CategoryId = product.CategoryId,

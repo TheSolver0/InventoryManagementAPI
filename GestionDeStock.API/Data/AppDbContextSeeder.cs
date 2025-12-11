@@ -7,10 +7,10 @@ namespace GestionDeStock.API.Data
     {
         public static async Task SeedAsync(AppDbContext context)
         {
-            if (!context.Categories.Any())
+            if (!await context.Categories.AnyAsync())
             {
-                var cat1 = new Category { Id = 1, Title = "Électronique" };
-                var cat2 = new Category { Id = 2, Title = "Alimentation" };
+                var cat1 = new Category { Id = 1, Title = "Électronique", CreatedAt = DateTime.Now, UpdatedAt = DateTime.Now };
+                var cat2 = new Category { Id = 2, Title = "Alimentation", CreatedAt = DateTime.Now, UpdatedAt = DateTime.Now };
 
                 context.Categories.AddRange(cat1, cat2);
 
@@ -23,8 +23,10 @@ namespace GestionDeStock.API.Data
                         CategoryId = cat1.Id,
                         Category = cat1,
                         Quantity = 50,
-                        Price = 299.99m,
-                        Threshold = 10
+                        Price = 60000,
+                        Threshold = 10,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now
                     },
                     new Product
                     {
@@ -34,14 +36,16 @@ namespace GestionDeStock.API.Data
                         CategoryId = cat2.Id,
                         Category = cat2,
                         Quantity = 200,
-                        Price = 2.99m,
-                        Threshold = 30
+                        Price = 2500,
+                        Threshold = 30,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now
                     }
                 );
 
                 await context.SaveChangesAsync();
             }
-            if (!context.Suppliers.Any())
+            if (!await context.Suppliers.AnyAsync())
             {
                 context.Suppliers.AddRange(
                     new Supplier
@@ -66,7 +70,7 @@ namespace GestionDeStock.API.Data
 
                 await context.SaveChangesAsync();
             }
-            if (!context.Customers.Any())
+            if (!await context.Customers.AnyAsync())
             {
                 context.Customers.AddRange(
                     new Customer
@@ -76,7 +80,9 @@ namespace GestionDeStock.API.Data
                         Email = "contact@clienta.com",
                         Address = "1 Rue de la Paix, Paris",
                         Telephone = 123456789,
-                        Points = 100
+                        Points = 100,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now
                     },
                     new Customer
                     {
@@ -85,7 +91,9 @@ namespace GestionDeStock.API.Data
                         Email = "contact@clientb.com",
                         Address = "2 Avenue des Champs-Élysées, Paris",
                         Telephone = 987654321,
-                        Points = 100
+                        Points = 100,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now
                     }
                 );
 

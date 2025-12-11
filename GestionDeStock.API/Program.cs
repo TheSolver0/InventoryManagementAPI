@@ -72,5 +72,5 @@ using (var scope = app.Services.CreateScope())
     await AppDbContextSeeder.SeedAsync(context);
 }
 
-app.Run();
+await app.RunAsync();
 
