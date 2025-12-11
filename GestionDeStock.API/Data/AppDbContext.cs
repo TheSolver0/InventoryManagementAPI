@@ -1,15 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using GestionDeStock.API.Models;
+using GestionDeStock.API.Interfaces;
 
 namespace GestionDeStock.API.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options)
-            : base(options)
-        {
-        }
-
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Customer> Customers { get; set; }
