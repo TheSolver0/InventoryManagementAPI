@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "wGxpM9Foit8=",
+  "dgSpecHash": "gL9+T7NmZLQ=",
   "success": true,
-  "projectFilePath": "D:\\Travail\\InventoryManagementAPI\\gestiondestock.api\\GestionDeStock.API.csproj",
+  "projectFilePath": "D:\\Travail\\InventoryManagementAPI\\GestionDeStock.API\\GestionDeStock.API.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Luc FOTSO\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\Luc FOTSO\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.9\\microsoft.aspnetcore.openapi.9.0.9.nupkg.sha512",

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Travail\\InventoryManagementAPI\\gestiondestock.api\\GestionDeStock.API.csproj": {}
+    "D:\\Travail\\InventoryManagementAPI\\GestionDeStock.API\\GestionDeStock.API.csproj": {}
   },
   "projects": {
-    "D:\\Travail\\InventoryManagementAPI\\gestiondestock.api\\GestionDeStock.API.csproj": {
+    "D:\\Travail\\InventoryManagementAPI\\GestionDeStock.API\\GestionDeStock.API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Travail\\InventoryManagementAPI\\gestiondestock.api\\GestionDeStock.API.csproj",
+        "projectUniqueName": "D:\\Travail\\InventoryManagementAPI\\GestionDeStock.API\\GestionDeStock.API.csproj",
         "projectName": "GestionDeStock.API",
-        "projectPath": "D:\\Travail\\InventoryManagementAPI\\gestiondestock.api\\GestionDeStock.API.csproj",
+        "projectPath": "D:\\Travail\\InventoryManagementAPI\\GestionDeStock.API\\GestionDeStock.API.csproj",
         "packagesPath": "C:\\Users\\Luc FOTSO\\.nuget\\packages\\",
-        "outputPath": "D:\\Travail\\InventoryManagementAPI\\gestiondestock.api\\obj\\",
+        "outputPath": "D:\\Travail\\InventoryManagementAPI\\GestionDeStock.API\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Luc FOTSO\\AppData\\Roaming\\NuGet\\NuGet.Config"

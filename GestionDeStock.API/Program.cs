@@ -12,7 +12,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
-    // options.JsonSerializerOptions.PropertyNamingPolicy = null;
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 
@@ -32,10 +31,6 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowedFrontEnd", policy =>
     {
         policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-
-        /*policy.WithOrigins("http://localhost:5173/")
-            .AllowAnyHeader()
-            .AllowAnyMethod();*/
     });
 });
 
