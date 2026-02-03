@@ -8,13 +8,9 @@ namespace GestionDeStock.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class OrdersController : ControllerBase
+    public class OrdersController(AppDbContext context) : ControllerBase
     {
-        private readonly AppDbContext _context;
-        public OrdersController(AppDbContext context)
-        {
-            _context = context;
-        }
+        private readonly AppDbContext _context = context;
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrders()
@@ -43,6 +39,7 @@ namespace GestionDeStock.API.Controllers
             return Ok(order);
         }
         [HttpPost]
+        [ProducesResponseType<Order>(StatusCodes.Status200OK)]
         public IActionResult CreateOrder([FromBody] OrderDto orderDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -61,6 +58,7 @@ namespace GestionDeStock.API.Controllers
 
                 var newOrder = new Order
                 {
+                    Id = 0,
                     Quantity = orderDto.Quantity,
                     Amount = amount,
                     CustomerId = orderDto.CustomerId,
@@ -115,6 +113,7 @@ namespace GestionDeStock.API.Controllers
 
                 await _context.Movements.AddAsync(new Movement
                 {
+                    Id = 0,
                     Quantity = existingOrder.Quantity,
                     Amount = existingOrder.Amount,
                     ProductId = existingOrder.ProductId,

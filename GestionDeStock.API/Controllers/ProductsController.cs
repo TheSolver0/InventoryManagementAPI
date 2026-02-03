@@ -31,6 +31,7 @@ namespace GestionDeStock.API.Controllers
             return Ok(product);
         }
         [HttpPost]
+        [ProducesResponseType<Product>(StatusCodes.Status200OK)]
         public IActionResult CreateProduct([FromBody] ProductDto product)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -43,12 +44,15 @@ namespace GestionDeStock.API.Controllers
 
                 var newProduct = new Product
                 {
+                    Id = 0,
                     Name = product.Name,
                     Desc = product.Desc,
                     CategoryId = product.CategoryId,
                     Quantity = product.Quantity,
                     Price = product.Price,
                     Threshold = product.Threshold,
+                    Sku = product.Sku,
+                    Location = product.Location,
                     Category = category
 
                 };
@@ -85,6 +89,8 @@ namespace GestionDeStock.API.Controllers
             existingProduct.Quantity = product.Quantity;
             existingProduct.Price = product.Price;
             existingProduct.Threshold = product.Threshold;
+            existingProduct.Sku = product.Sku;
+            existingProduct.Location = product.Location;
 
             await _context.SaveChangesAsync();
 

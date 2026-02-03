@@ -1,21 +1,22 @@
 using System.ComponentModel.DataAnnotations;
+using GestionDeStock.API.Interfaces;
 
 namespace GestionDeStock.API.Models
 {
     public class Provide : ITimestamped
     {
-        public int Id { get; set; }
+        public required int Id { get; set; }
         public ProvideType Type { get; set; } = ProvideType.ENTREE;
-        public int Quantity { get; set; }
-        public decimal Amount { get; set; }
-        public int SupplierId { get; set; }
+        public required int Quantity { get; set; }
+        public required decimal Amount { get; set; }
+        public required int SupplierId { get; set; }
         public Supplier? Supplier { get; set; }
-        public int ProductId { get; set; }
+        public required int ProductId { get; set; }
         public Product? Product { get; set; }
         public ProvideStatus Status { get; set; } = ProvideStatus.EN_ATTENTE;
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        public DateTime UpdatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
 
     }

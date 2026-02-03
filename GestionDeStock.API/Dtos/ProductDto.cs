@@ -8,5 +8,7 @@ namespace GestionDeStock.API.Dtos
         public required int Quantity { get; set; }
         public required decimal Price { get; set; }
         public required int Threshold { get; set; }
+        public required string Sku { get; set; } = string.Empty;
+        public required string Location { get; set; } = string.Empty;
     }
 }
