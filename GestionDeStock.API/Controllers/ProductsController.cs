@@ -51,6 +51,8 @@ namespace GestionDeStock.API.Controllers
                     Quantity = product.Quantity,
                     Price = product.Price,
                     Threshold = product.Threshold,
+                    Sku = product.Sku,
+                    Location = product.Location,
                     Category = category
 
                 };
@@ -87,6 +89,8 @@ namespace GestionDeStock.API.Controllers
             existingProduct.Quantity = product.Quantity;
             existingProduct.Price = product.Price;
             existingProduct.Threshold = product.Threshold;
+            existingProduct.Sku = product.Sku;
+            existingProduct.Location = product.Location;
 
             await _context.SaveChangesAsync();
 

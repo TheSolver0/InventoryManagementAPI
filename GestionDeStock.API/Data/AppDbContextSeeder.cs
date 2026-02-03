@@ -25,6 +25,8 @@ namespace GestionDeStock.API.Data
                         Quantity = 50,
                         Price = 60000,
                         Threshold = 10,
+                        Sku = "SMRT-PHN-001",
+                        Location = "Aisle 1, Shelf A",
                         CreatedAt = DateTime.Now,
                         UpdatedAt = DateTime.Now
                     },
@@ -38,6 +40,8 @@ namespace GestionDeStock.API.Data
                         Quantity = 200,
                         Price = 2500,
                         Threshold = 30,
+                        Sku = "CHOC-NOIR-70",
+                        Location = "Aisle 3, Shelf B",
                         CreatedAt = DateTime.Now,
                         UpdatedAt = DateTime.Now
                     }
