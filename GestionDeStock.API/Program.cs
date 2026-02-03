@@ -7,6 +7,8 @@ using Microsoft.Extensions.Options;
 using NSwag.Generation.Processors.Security; // Add this for NSwag
 using NSwag.AspNetCore;
 using System.Text.Json.Serialization; // Add this for NSwag
+using GestionDeStock.API.Interfaces;
+using GestionDeStock.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +35,10 @@ builder.Services.AddCors(options =>
         policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
     });
 });
+
+builder.Services.AddScoped<IInventoryService, InventoryService>();
+builder.Services.AddScoped<IStockMovementService, StockMovementService>(); 
+
 
 var app = builder.Build();
 
