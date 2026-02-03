@@ -8,9 +8,13 @@ namespace GestionDeStock.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class MovementsController(AppDbContext context) : ControllerBase
+    public class MovementsController : ControllerBase
     {
-        private readonly AppDbContext _context = context;
+        private readonly AppDbContext _context;
+        public MovementsController(AppDbContext context)
+        {
+            _context = context;
+        }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Movement>>> GetMovements()

@@ -1,11 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using GestionDeStock.API.Models;
-using GestionDeStock.API.Interfaces;
 
 namespace GestionDeStock.API.Data
 {
-    public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+    public class AppDbContext : DbContext
     {
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+            : base(options)
+        {
+        }
+
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Customer> Customers { get; set; }
@@ -13,9 +17,6 @@ namespace GestionDeStock.API.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<Provide> Provides { get; set; }
         public DbSet<Movement> Movements { get; set; }
-        public DbSet<StockMovement> StockMovements { get; set; }
-         public DbSet<InventorySession> InventorySessions { get; set; }
-        public DbSet<InventoryLine> InventoryLines { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -38,20 +39,6 @@ namespace GestionDeStock.API.Data
                 .HasMany(s => s.Products)
                 .WithMany(p => p.Suppliers)
                 .UsingEntity(j => j.ToTable("SupplierProducts"));
-            
-              // Configuration des relations
-            modelBuilder.Entity<InventoryLine>()
-                .HasOne(il => il.Session)
-                .WithMany(s => s.Lines)
-                .HasForeignKey(il => il.InventorySessionId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<InventoryLine>()
-                .HasOne(il => il.Product)
-                .WithMany()
-                .HasForeignKey(il => il.ProductId)
-                .OnDelete(DeleteBehavior.Restrict);
-        
         }
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

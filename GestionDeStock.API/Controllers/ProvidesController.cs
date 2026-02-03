@@ -8,9 +8,13 @@ namespace GestionDeStock.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ProvidesController(AppDbContext context) : ControllerBase
+    public class ProvidesController : ControllerBase
     {
-        private readonly AppDbContext _context = context;
+        private readonly AppDbContext _context;
+        public ProvidesController(AppDbContext context)
+        {
+            _context = context;
+        }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProvideDto>>> GetProvides()
@@ -39,9 +43,6 @@ namespace GestionDeStock.API.Controllers
             return Ok(provide);
         }
         [HttpPost]
-
-        [ProducesResponseType<Provide>(StatusCodes.Status200OK)]
-
         public IActionResult CreateProvide([FromBody] ProvideDto provideDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -58,7 +59,6 @@ namespace GestionDeStock.API.Controllers
 
                 var newProvide = new Provide
                 {
-                    Id = 0,
                     Quantity = provideDto.Quantity,
                     Amount = amount,
                     SupplierId = provideDto.SupplierId,
@@ -94,10 +94,21 @@ namespace GestionDeStock.API.Controllers
 
             try
             {
-            
+                /*var supplier = _context.Suppliers.Find(provideDto.SupplierId);
+                if (supplier == null)
+                    return BadRequest("Fournisseur introuvable");
+                var product = _context.Products.Find(provideDto.ProductId);
+                if (product == null)
+                    return BadRequest("Produit introuvable");
+                var amount = product.Price * provideDto.Quantity;*/
+
+
                 existingProvide.Quantity = provideDto.Quantity;
+                // existingProvide.Amount = amount;
                 existingProvide.SupplierId = provideDto.SupplierId;
                 existingProvide.ProductId = provideDto.ProductId;
+                // existingProvide.Product = product;
+                // existingProvide.Supplier = supplier;
                 existingProvide.Status = provideDto.Status;
                 // Si la commande est livrée, ajuster le stock et enregistrer le mouvement
                 if (existingProvide.Status == ProvideStatus.LIVREE)
@@ -105,15 +116,13 @@ namespace GestionDeStock.API.Controllers
                     var product = await _context.Products.FindAsync(existingProvide.ProductId);
                     if (product != null)
                     {
-                        if (product.Quantity < existingProvide.Quantity)
-                            return BadRequest("Stock insuffisant pour livrer cette commande.");
+                        
                         product.Quantity += existingProvide.Quantity;
                         existingProvide.Amount = provideDto.Quantity * product.Price;
                     }
 
                     await _context.Movements.AddAsync(new Movement
                     {
-                        Id = 0,
                         Quantity = existingProvide.Quantity,
                         Amount = existingProvide.Amount,
                         ProductId = existingProvide.ProductId,
@@ -123,7 +132,8 @@ namespace GestionDeStock.API.Controllers
                 }
 
 
-               await _context.SaveChangesAsync();
+                // _context.Provides.Add(newProvide);
+                _context.SaveChanges();
 
                 return Ok(existingProvide);
             }

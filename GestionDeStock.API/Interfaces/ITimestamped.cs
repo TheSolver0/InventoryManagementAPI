@@ -1,8 +1,5 @@
-namespace GestionDeStock.API.Interfaces
+public interface ITimestamped
 {
-    public interface ITimestamped
-    {
-        DateTime CreatedAt { get; set; }
-        DateTime UpdatedAt { get; set; }
-    }
+    DateTime CreatedAt { get; set; }
+    DateTime UpdatedAt { get; set; }
 }

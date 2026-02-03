@@ -59,10 +59,10 @@ namespace GestionDeStock.API.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("Points")
+                    b.Property<int>("Points")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("Telephone")
+                    b.Property<int>("Telephone")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -71,111 +71,6 @@ namespace GestionDeStock.API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Customers");
-                });
-
-            modelBuilder.Entity("GestionDeStock.API.Models.InventoryLine", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime?>("CountedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CountedBy")
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal?>("CountedQuantity")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("InventorySessionId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Location")
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(500)
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ProductName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ProductSku")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("TheoreticalQuantity")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("InventorySessionId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("InventoryLines");
-                });
-
-            modelBuilder.Entity("GestionDeStock.API.Models.InventorySession", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(500)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Reference")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ValidatedBy")
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("ValidatedDate")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("InventorySessions");
                 });
 
             modelBuilder.Entity("GestionDeStock.API.Models.Movement", b =>
@@ -274,10 +169,6 @@ namespace GestionDeStock.API.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Location")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -287,10 +178,6 @@ namespace GestionDeStock.API.Migrations
 
                     b.Property<int>("Quantity")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("Sku")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
 
                     b.Property<int>("Threshold")
                         .HasColumnType("INTEGER");
@@ -344,49 +231,6 @@ namespace GestionDeStock.API.Migrations
                     b.ToTable("Provides");
                 });
 
-            modelBuilder.Entity("GestionDeStock.API.Models.StockMovement", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Reason")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Reference")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("RelatedMovementId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("RelatedMovementId");
-
-                    b.ToTable("StockMovements");
-                });
-
             modelBuilder.Entity("GestionDeStock.API.Models.Supplier", b =>
                 {
                     b.Property<int>("Id")
@@ -435,25 +279,6 @@ namespace GestionDeStock.API.Migrations
                     b.HasIndex("SuppliersId");
 
                     b.ToTable("SupplierProducts", (string)null);
-                });
-
-            modelBuilder.Entity("GestionDeStock.API.Models.InventoryLine", b =>
-                {
-                    b.HasOne("GestionDeStock.API.Models.InventorySession", "Session")
-                        .WithMany("Lines")
-                        .HasForeignKey("InventorySessionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("GestionDeStock.API.Models.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-
-                    b.Navigation("Session");
                 });
 
             modelBuilder.Entity("GestionDeStock.API.Models.Movement", b =>
@@ -528,23 +353,6 @@ namespace GestionDeStock.API.Migrations
                     b.Navigation("Supplier");
                 });
 
-            modelBuilder.Entity("GestionDeStock.API.Models.StockMovement", b =>
-                {
-                    b.HasOne("GestionDeStock.API.Models.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("GestionDeStock.API.Models.Movement", "RelatedMovement")
-                        .WithMany()
-                        .HasForeignKey("RelatedMovementId");
-
-                    b.Navigation("Product");
-
-                    b.Navigation("RelatedMovement");
-                });
-
             modelBuilder.Entity("ProductSupplier", b =>
                 {
                     b.HasOne("GestionDeStock.API.Models.Product", null)
@@ -568,11 +376,6 @@ namespace GestionDeStock.API.Migrations
             modelBuilder.Entity("GestionDeStock.API.Models.Customer", b =>
                 {
                     b.Navigation("Orders");
-                });
-
-            modelBuilder.Entity("GestionDeStock.API.Models.InventorySession", b =>
-                {
-                    b.Navigation("Lines");
                 });
 #pragma warning restore 612, 618
         }

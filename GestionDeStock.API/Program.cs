@@ -7,13 +7,12 @@ using Microsoft.Extensions.Options;
 using NSwag.Generation.Processors.Security; // Add this for NSwag
 using NSwag.AspNetCore;
 using System.Text.Json.Serialization; // Add this for NSwag
-using GestionDeStock.API.Interfaces;
-using GestionDeStock.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
+    // options.JsonSerializerOptions.PropertyNamingPolicy = null;
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 
@@ -33,12 +32,12 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowedFrontEnd", policy =>
     {
         policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+
+        /*policy.WithOrigins("http://localhost:5173/")
+            .AllowAnyHeader()
+            .AllowAnyMethod();*/
     });
 });
-
-builder.Services.AddScoped<IInventoryService, InventoryService>();
-builder.Services.AddScoped<IStockMovementService, StockMovementService>(); 
-
 
 var app = builder.Build();
 
@@ -48,6 +47,12 @@ if (app.Environment.IsDevelopment())
     app.UseOpenApi();
     app.UseSwaggerUi();
 }
+// Configuration pour la production
+if (builder.Environment.IsProduction())
+{
+    builder.Configuration.AddEnvironmentVariables();
+}
+
 
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
@@ -70,8 +75,13 @@ app.UseCors("AllowedFrontEnd");
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    
+    // Cette méthode crée la base et les tables automatiquement
+    context.Database.EnsureCreated();
+    
+    // Seed des données
     await AppDbContextSeeder.SeedAsync(context);
 }
 
-await app.RunAsync();
+app.Run();
 

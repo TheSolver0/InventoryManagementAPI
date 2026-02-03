@@ -8,9 +8,13 @@ namespace GestionDeStock.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CustomersController(AppDbContext context) : ControllerBase
+    public class CustomersController : ControllerBase
     {
-        private readonly AppDbContext _context = context;
+        private readonly AppDbContext _context;
+        public CustomersController(AppDbContext context)
+        {
+            _context = context;
+        }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Customer>>> GetCustomers()
@@ -34,7 +38,6 @@ namespace GestionDeStock.API.Controllers
             {
                 var newCustomer = new Customer
             {
-                Id = 0,
                 Name = customer.Name,
                 Email = customer.Email,
                 Address = customer.Address,
