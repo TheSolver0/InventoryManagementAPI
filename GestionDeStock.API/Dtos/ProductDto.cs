@@ -7,8 +7,15 @@ namespace GestionDeStock.API.Dtos
         public required int CategoryId { get; set; }
         public required int Quantity { get; set; }
         public required decimal Price { get; set; }
+        public decimal? OldPrice { get; set; }
         public required int Threshold { get; set; }
-        public required string Sku { get; set; } = string.Empty;
-        public required string Location { get; set; } = string.Empty;
+        public required string Sku { get; set; }
+        public required string Location { get; set; }
+        public string? Brand { get; set; }
+        public string? Badge { get; set; }
+        public float Rating { get; set; } = 0;
+        public int ReviewCount { get; set; } = 0;
+        public bool IsActive { get; set; } = true;
+        public IFormFile? Image { get; set; }
     }
 }

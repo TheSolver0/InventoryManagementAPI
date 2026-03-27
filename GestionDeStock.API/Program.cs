@@ -38,9 +38,13 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<IStockMovementService, StockMovementService>(); 
+builder.Services.AddScoped<IImageService, ImageService>();
 
 
 var app = builder.Build();
+
+app.UseStaticFiles();
+app.UseRouting();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

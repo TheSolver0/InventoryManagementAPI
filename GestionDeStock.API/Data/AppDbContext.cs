@@ -17,6 +17,9 @@ namespace GestionDeStock.API.Data
          public DbSet<InventorySession> InventorySessions { get; set; }
         public DbSet<InventoryLine> InventoryLines { get; set; }
 
+        public DbSet<Review> Reviews { get; set; }
+        public DbSet<HeroSlide> HeroSlides { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Category -> Product (1:N)
