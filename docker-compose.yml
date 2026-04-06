@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: gestion_de_stock_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-GestionDeStockDB}
+      MYSQL_USER: ${DB_USER:-gestionuser}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-gestionpassword}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - gestion_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gestion_de_stock_api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=${DB_NAME:-GestionDeStockDB};Uid=${DB_USER:-gestionuser};Pwd=${DB_PASSWORD:-gestionpassword};
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - gestion_network
+    restart: unless-stopped
+    volumes:
+      - ./uploads:/app/wwwroot/uploads
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  gestion_network:
+    driver: bridge

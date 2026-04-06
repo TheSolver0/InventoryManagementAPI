@@ -1,6 +1,7 @@
 using GestionDeStock.API.Data;
 using GestionDeStock.API.Models;
 using GestionDeStock.API.Services;
+using GestionDeStock.API.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -85,60 +86,95 @@ namespace GestionDeStock.API.Controllers
             created_at     = p.CreatedAt,
         };
 
-        // ── LISTE ──────────────────────────────────────────────────────
-        // GET /api/ecom/products?cat=laptops&page=1&limit=8
-        [HttpGet("products")]
-        public async Task<IActionResult> GetProducts(
-            [FromQuery] string? cat   = null,
-            [FromQuery] string? q     = null,
-            [FromQuery] int     page  = 1,
-            [FromQuery] int     limit = 8)
-        {
-            page  = Math.Max(1, page);
-            limit = Math.Clamp(limit, 1, 100);
+    
+        // GET /api/ecom/products?cat=...&q=...&marque=...&pmin=...&pmax=...&tri=...&page=...&limit=...
+[HttpGet("products")]
+public async Task<IActionResult> GetProducts(
+    [FromQuery] string? cat   = null,
+    [FromQuery] string? q     = null,
+    [FromQuery] string? marque = null,   // nouveau
+    [FromQuery] decimal? pmin = null,    // nouveau
+    [FromQuery] decimal? pmax = null,    // nouveau
+    [FromQuery] string  tri   = "recent",// nouveau
+    [FromQuery] int     page  = 1,
+    [FromQuery] int     limit = 12)
+{
+    page  = Math.Max(1, page);
+    limit = Math.Clamp(limit, 1, 100);
 
-            var query = _context.Products
-                .Include(p => p.Category)
-                .Where(p => p.IsActive)
-                .AsQueryable();
+    var query = _context.Products
+        .Include(p => p.Category)
+        .Where(p => p.IsActive)
+        .AsQueryable();
 
-            // Filtre catégorie : slug PHP → Title .NET
-            if (!string.IsNullOrEmpty(cat))
-            {
-                // Résolution : slug → title via dictionnaire, sinon auto-match
-                var title = SlugToTitle.TryGetValue(cat, out var t)
-                    ? t
-                    : cat; // fallback : utilise le slug tel quel
+    if (!string.IsNullOrEmpty(cat))
+    {
+        var title = SlugToTitle.TryGetValue(cat, out var t) ? t : cat;
+        query = query.Where(p =>
+            p.Category != null &&
+            p.Category.Title.ToLower() == title.ToLower());
+    }
 
-                query = query.Where(p =>
-                    p.Category != null &&
-                    p.Category.Title.ToLower() == title.ToLower());
-            }
+    if (!string.IsNullOrEmpty(q))
+        query = query.Where(p =>
+            p.Name.Contains(q) ||
+            p.Desc.Contains(q) ||
+            (p.Brand != null && p.Brand.Contains(q)));
 
-            // Recherche texte
-            if (!string.IsNullOrEmpty(q))
-                query = query.Where(p =>
-                    p.Name.Contains(q) ||
-                    p.Desc.Contains(q) ||
-                    (p.Brand != null && p.Brand.Contains(q)) ||
-                    (p.Category != null && p.Category.Title.Contains(q)));
+    if (!string.IsNullOrEmpty(marque))
+        query = query.Where(p => p.Brand == marque);
 
-            var total = await query.CountAsync();
+    if (pmin.HasValue)
+        query = query.Where(p => p.Price >= pmin.Value);
 
-            var products = await query
-                .OrderByDescending(p => p.CreatedAt)
-                .Skip((page - 1) * limit)
-                .Take(limit)
-                .ToListAsync();
+    if (pmax.HasValue)
+        query = query.Where(p => p.Price <= pmax.Value);
 
-            return Ok(new
-            {
-                produits = products.Select(FormatProduct),
-                total    = total,
-                page     = page,
-                pages    = (int)Math.Ceiling((double)total / limit),
-            });
-        }
+    // Tri
+    query = tri switch {
+        "prix_asc"  => query.OrderBy(p => p.Price),
+        "prix_desc" => query.OrderByDescending(p => p.Price),
+        "note"      => query.OrderByDescending(p => p.Rating)
+                            .ThenByDescending(p => p.ReviewCount),
+        "promo"     => query.OrderByDescending(p => p.OldPrice - p.Price),
+        _           => query.OrderByDescending(p => p.CreatedAt), // recent
+    };
+
+    var total = await query.CountAsync();
+
+    var products = await query
+        .Skip((page - 1) * limit)
+        .Take(limit)
+        .ToListAsync();
+
+    // Marques disponibles pour la sidebar — sur le même filtre SANS filtre marque
+    var marqueQuery = _context.Products
+        .Include(p => p.Category)
+        .Where(p => p.IsActive && p.Brand != null && p.Brand != "");
+
+    if (!string.IsNullOrEmpty(cat))
+    {
+        var title = SlugToTitle.TryGetValue(cat, out var t) ? t : cat;
+        marqueQuery = marqueQuery.Where(p =>
+            p.Category != null &&
+            p.Category.Title.ToLower() == title.ToLower());
+    }
+
+    var marques = await marqueQuery
+        .Select(p => p.Brand!)
+        .Distinct()
+        .OrderBy(m => m)
+        .ToListAsync();
+
+    return Ok(new
+    {
+        produits    = products.Select(FormatProduct),
+        total       = total,
+        page        = page,
+        pages       = (int)Math.Ceiling((double)total / limit),
+        marques     = marques,   // 👈 pour la sidebar marques
+    });
+}
 
         // ── SINGLE ─────────────────────────────────────────────────────
         // GET /api/ecom/products/3
@@ -201,6 +237,37 @@ namespace GestionDeStock.API.Controllers
                 similaires = similaires.Select(FormatProduct),
             });
         }
+
+[HttpPost("reviews")]
+public async Task<IActionResult> PostReview([FromBody] ReviewDto dto)
+{
+    var product = await _context.Products.FindAsync(dto.ProductId);
+    if (product == null) return NotFound(new { erreur = "Produit introuvable" });
+
+    var review = new Review
+    {
+        ProductId = dto.ProductId,
+        Author    = dto.Author,
+        Rating    = dto.Rating,
+        Comment   = dto.Comment,
+    };
+
+    _context.Reviews.Add(review);
+
+    // Recalculer la note moyenne du produit
+    var allReviews = await _context.Reviews
+        .Where(r => r.ProductId == dto.ProductId)
+        .ToListAsync();
+    allReviews.Add(review);
+
+    product.Rating      = (float)allReviews.Average(r => r.Rating);
+    product.ReviewCount = allReviews.Count;
+    product.UpdatedAt   = DateTime.UtcNow;
+
+    await _context.SaveChangesAsync();
+
+    return Ok(new { succes = true, review.Id });
+}
 
         // ── TENDANCE ───────────────────────────────────────────────────
         // GET /api/ecom/products/tendance

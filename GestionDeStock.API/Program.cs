@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Sqlite;
 using Microsoft.AspNetCore.Builder;
 using GestionDeStock.API.Data;
 using GestionDeStock.API.Middleware;
@@ -9,6 +8,7 @@ using NSwag.AspNetCore;
 using System.Text.Json.Serialization; // Add this for NSwag
 using GestionDeStock.API.Interfaces;
 using GestionDeStock.API.Services;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,8 +19,23 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 });
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddDbContext<AppDbContext>(options => 
-    options.UseSqlite("Data Source=GestionDeStockAPP.db"));
+
+// Database configuration - use MySQL in production, SQLite in development
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrEmpty(connectionString))
+{
+    // Fallback to SQLite for development
+    connectionString = "Data Source=GestionDeStockAPP.db";
+    builder.Services.AddDbContext<AppDbContext>(options => 
+        options.UseSqlite(connectionString));
+}
+else
+{
+    // Use MySQL for production
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseMySql(connectionString, 
+            ServerVersion.AutoDetect(connectionString)));
+}
 builder.Services.AddOpenApiDocument(config =>
 {
     config.Title = "GestionDeStock API";
