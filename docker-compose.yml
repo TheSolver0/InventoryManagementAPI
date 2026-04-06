@@ -27,6 +27,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: inventorymanagementapi-api:latest
     container_name: gestion_de_stock_api
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
