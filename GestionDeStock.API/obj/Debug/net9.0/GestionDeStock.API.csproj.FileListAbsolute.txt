@@ -332,3 +332,14 @@ D:\Travail\InventoryManagementAPI\gestiondestock.api\obj\Debug\net9.0\refint\Ges
 D:\Travail\InventoryManagementAPI\gestiondestock.api\obj\Debug\net9.0\GestionDeStock.API.pdb
 D:\Travail\InventoryManagementAPI\gestiondestock.api\obj\Debug\net9.0\GestionDeStock.API.genruntimeconfig.cache
 D:\Travail\InventoryManagementAPI\gestiondestock.api\obj\Debug\net9.0\ref\GestionDeStock.API.dll
+D:\Travail\InventoryManagementAPI\GestionDeStock.API\bin\Debug\net9.0\appsettings.Production.json
+D:\Travail\InventoryManagementAPI\GestionDeStock.API\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\Travail\InventoryManagementAPI\GestionDeStock.API\bin\Debug\net9.0\Microsoft.IdentityModel.Abstractions.dll
+D:\Travail\InventoryManagementAPI\GestionDeStock.API\bin\Debug\net9.0\Microsoft.IdentityModel.JsonWebTokens.dll
+D:\Travail\InventoryManagementAPI\GestionDeStock.API\bin\Debug\net9.0\Microsoft.IdentityModel.Logging.dll
+D:\Travail\InventoryManagementAPI\GestionDeStock.API\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.dll
+D:\Travail\InventoryManagementAPI\GestionDeStock.API\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+D:\Travail\InventoryManagementAPI\GestionDeStock.API\bin\Debug\net9.0\Microsoft.IdentityModel.Tokens.dll
+D:\Travail\InventoryManagementAPI\GestionDeStock.API\bin\Debug\net9.0\MySqlConnector.dll
+D:\Travail\InventoryManagementAPI\GestionDeStock.API\bin\Debug\net9.0\Pomelo.EntityFrameworkCore.MySql.dll
+D:\Travail\InventoryManagementAPI\GestionDeStock.API\bin\Debug\net9.0\System.IdentityModel.Tokens.Jwt.dll
