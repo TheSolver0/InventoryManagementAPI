@@ -7,7 +7,7 @@ COPY ["GestionDeStock.sln", "."]
 COPY ["GestionDeStock.API/GestionDeStock.API.csproj", "GestionDeStock.API/"]
 
 # Restore dependencies
-RUN dotnet restore "GestionDeStock.API/GestionDeStock.API.csproj"
+RUN dotnet restore "GestionDeStock.API/GestionDeStock.API.csproj" --verbosity detailed
 
 # Copy the entire source code
 COPY . .
