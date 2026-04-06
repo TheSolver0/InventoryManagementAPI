@@ -41,7 +41,7 @@ namespace GestionDeStock.API.Data
             modelBuilder.Entity<Supplier>()
                 .HasMany(s => s.Products)
                 .WithMany(p => p.Suppliers)
-                .UsingEntity(j => j.ToTable("SupplierProducts"));
+                .UsingEntity("SupplierProducts");
             
               // Configuration des relations
             modelBuilder.Entity<InventoryLine>()

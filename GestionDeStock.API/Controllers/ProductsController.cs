@@ -35,7 +35,7 @@ public class ProductsController : ControllerBase
             p.Id, p.Name, p.Desc, p.CategoryId, p.Category,
             p.Quantity, p.Price, p.Threshold, p.Sku, p.Location,
             p.ImagePath,
-            ImageUrl = _imageService.BuildPublicUrl(Request, p.ImagePath), // 👈 URL absolue
+            ImageUrl = _imageService.BuildPublicUrl(Request, p.ImagePath), //  URL absolue
             p.CreatedAt, p.UpdatedAt
         });
 
