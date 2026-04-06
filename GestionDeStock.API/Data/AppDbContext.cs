@@ -19,6 +19,7 @@ namespace GestionDeStock.API.Data
 
         public DbSet<Review> Reviews { get; set; }
         public DbSet<HeroSlide> HeroSlides { get; set; }
+        public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

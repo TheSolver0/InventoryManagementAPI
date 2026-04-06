@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using GestionDeStock.API.Data;
 using GestionDeStock.API.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GestionDeStock.API.Controllers
 {
+   [Authorize]
    [ApiController]
 [Route("api/[controller]")]
 public class ProductsController : ControllerBase

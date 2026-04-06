@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using GestionDeStock.API.Services;
 using GestionDeStock.API.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GestionDeStock.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class StockMovementsController : ControllerBase

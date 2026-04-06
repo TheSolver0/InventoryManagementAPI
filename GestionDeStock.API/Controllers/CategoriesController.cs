@@ -2,9 +2,11 @@ using GestionDeStock.API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using GestionDeStock.API.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GestionDeStock.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class CategoriesController : ControllerBase

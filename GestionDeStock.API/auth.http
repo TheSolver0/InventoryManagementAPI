@@ -1,0 +1,67 @@
+@baseUrl = http://localhost:5000
+
+### Variables
+@email = user@example.com
+@password = TestPassword123
+@token = 
+
+### 1. Register a new user
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "username": "testuser",
+  "password": "{{password}}",
+  "confirmPassword": "{{password}}"
+}
+
+### 2. Login
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### 3. Get Products (Protected - requires token)
+GET {{baseUrl}}/api/products
+Authorization: Bearer {{token}}
+
+### 4. Get Categories (Protected - requires token)
+GET {{baseUrl}}/api/categories
+Authorization: Bearer {{token}}
+
+### 5. Get Orders (Protected - requires token)
+GET {{baseUrl}}/api/orders
+Authorization: Bearer {{token}}
+
+### 6. Get Customers (Protected - requires token)
+GET {{baseUrl}}/api/customers
+Authorization: Bearer {{token}}
+
+### 7. Create Product (Protected - requires token)
+POST {{baseUrl}}/api/products
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "New Product",
+  "description": "Product description",
+  "price": 99.99,
+  "quantity": 100,
+  "categoryId": 1
+}
+
+### 8. Get Suppliers (Protected - requires token)
+GET {{baseUrl}}/api/suppliers
+Authorization: Bearer {{token}}
+
+### 9. Get Inventory (Protected - requires token)
+GET {{baseUrl}}/api/inventory
+Authorization: Bearer {{token}}
+
+### 10. Test without token (should return 401)
+GET {{baseUrl}}/api/products

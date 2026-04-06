@@ -4,9 +4,11 @@ using GestionDeStock.API.Services;
 using GestionDeStock.API.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GestionDeStock.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/ecom")]
     public class EcomController : ControllerBase

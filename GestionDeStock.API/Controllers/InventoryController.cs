@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using GestionDeStock.API.Services;
 using GestionDeStock.API.Dtos;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GestionDeStock.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class InventoryController(IInventoryService inventoryService) : ControllerBase
