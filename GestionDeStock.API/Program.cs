@@ -96,8 +96,8 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseCors("AllowedFrontEnd");
 app.UseMiddleware<ErrorHandlingMiddleware>();
-// app.UseAuthentication();
-// app.UseAuthorization();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 app.MapGet("/", () => "Welcome to GestionDeStock API!").WithOpenApi();
