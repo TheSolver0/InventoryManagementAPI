@@ -124,8 +124,20 @@ app.UseCors("AllowedFrontEnd");
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await context.Database.MigrateAsync();
-    await AppDbContextSeeder.SeedAsync(context);
+    try
+    {
+        await context.Database.MigrateAsync();
+
+        // Vérifie que la table existe avant seed
+        if (context.Database.CanConnect())
+        {
+            await AppDbContextSeeder.SeedAsync(context);
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Migration error: " + ex.Message);
+    }
 }
 
 await app.RunAsync();
