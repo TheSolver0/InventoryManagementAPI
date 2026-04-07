@@ -94,6 +94,14 @@ var app = builder.Build();
 
 app.UseStaticFiles();
 app.UseRouting();
+app.UseCors("AllowedFrontEnd");
+app.UseMiddleware<ErrorHandlingMiddleware>();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+app.MapGet("/", () => "Welcome to GestionDeStock API!").WithOpenApi();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -111,15 +119,12 @@ app.Use(async (context, next) =>
     await next.Invoke();
 });
 
-app.MapGet("/", () => "Welcome to GestionDeStock API!").WithOpenApi();
 
 // Add authentication and authorization middleware
-app.UseAuthentication();
-app.UseHttpsRedirection();
-app.UseAuthorization();
-app.MapControllers();
-app.UseMiddleware<ErrorHandlingMiddleware>();
-app.UseCors("AllowedFrontEnd");
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 using (var scope = app.Services.CreateScope())
 {
