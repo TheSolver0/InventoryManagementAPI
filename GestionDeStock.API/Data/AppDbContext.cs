@@ -23,6 +23,12 @@ namespace GestionDeStock.API.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.HasKey(u => u.Id);
+                entity.Property(u => u.Id)
+                    .ValueGeneratedOnAdd(); // Configure Id as auto-increment
+            });
             // Category -> Product (1:N)
             modelBuilder.Entity<Product>()
                 .HasOne(p => p.Category)
