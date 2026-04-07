@@ -121,7 +121,7 @@ namespace GestionDeStock.API.Services
                 return new AuthResponseDto 
                 { 
                     Success = false, 
-                    Message = "Une erreur s'est produite lors de l'enregistrement." 
+                    Message = ex.Message 
                 };
             }
         }
