@@ -343,3 +343,4 @@ D:\Travail\InventoryManagementAPI\GestionDeStock.API\bin\Debug\net9.0\Microsoft.
 D:\Travail\InventoryManagementAPI\GestionDeStock.API\bin\Debug\net9.0\MySqlConnector.dll
 D:\Travail\InventoryManagementAPI\GestionDeStock.API\bin\Debug\net9.0\Pomelo.EntityFrameworkCore.MySql.dll
 D:\Travail\InventoryManagementAPI\GestionDeStock.API\bin\Debug\net9.0\System.IdentityModel.Tokens.Jwt.dll
+D:\Travail\InventoryManagementAPI\GestionDeStock.API\bin\Debug\net9.0\GestionDeStock.API.staticwebassets.runtime.json

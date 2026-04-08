@@ -9,8 +9,8 @@ namespace GestionDeStock.API.Dtos
         public required decimal Price { get; set; }
         public decimal? OldPrice { get; set; }
         public required int Threshold { get; set; }
-        public required string Sku { get; set; }
-        public required string Location { get; set; }
+        public required string? Sku { get; set; }
+        public required string? Location { get; set; }
         public string? Brand { get; set; }
         public string? Badge { get; set; }
         public float Rating { get; set; } = 0;

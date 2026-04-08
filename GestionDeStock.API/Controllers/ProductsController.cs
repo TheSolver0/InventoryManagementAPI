@@ -73,7 +73,9 @@ public class ProductsController : ControllerBase
             var category = await _context.Categories.FindAsync(dto.CategoryId);
             if (category == null) return BadRequest("Catégorie introuvable.");
 
-            var imagePath = await _imageService.SaveImageAsync(dto.Image);
+            var imagePath = dto.Image != null
+                ? await _imageService.SaveImageAsync(dto.Image)
+                : null;
 
             var product = new Product
             {
@@ -85,8 +87,8 @@ public class ProductsController : ControllerBase
                 Quantity = dto.Quantity,
                 Price = dto.Price,
                 Threshold = dto.Threshold,
-                Sku = dto.Sku,
-                Location = dto.Location,
+                Sku = dto.Sku?? string.Empty,
+                Location = dto.Location?? string.Empty,
                 ImagePath = imagePath,
             };
 
