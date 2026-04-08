@@ -67,116 +67,117 @@ namespace GestionDeStock.API.Controllers
         private object FormatProduct(Product p) => new
         {
             // ── Nomenclature PHP ───────────────────────────────────────
-            id             = p.Id,
-            nom            = p.Name,
-            description    = p.Desc,
-            prix           = p.Price,
-            ancien_prix    = p.OldPrice,
-            stock          = p.Quantity,
-            categorie_id   = p.CategoryId,
-            categorie_nom  = p.Category?.Title ?? "",
+            id = p.Id,
+            nom = p.Name,
+            description = p.Desc,
+            prix = p.Price,
+            ancien_prix = p.OldPrice,
+            stock = p.Quantity,
+            categorie_id = p.CategoryId,
+            categorie_nom = p.Category?.Title ?? "",
             categorie_slug = p.Category != null
                                 ? SlugFromTitle(p.Category.Title)
                                 : "",
-            marque         = p.Brand  ?? "",
-            badge          = p.Badge  ?? "",
-            note           = p.Rating,
-            nb_avis        = p.ReviewCount,
-            actif          = p.IsActive ? 1 : 0,
-            image          = AbsoluteImage(p.ImagePath),
-            created_at     = p.CreatedAt,
+            marque = p.Brand ?? "",
+            badge = p.Badge ?? "",
+            note = p.Rating,
+            nb_avis = p.ReviewCount,
+            actif = p.IsActive ? 1 : 0,
+            image = AbsoluteImage(p.ImagePath),
+            created_at = p.CreatedAt,
         };
 
-    
+
         // GET /api/ecom/products?cat=...&q=...&marque=...&pmin=...&pmax=...&tri=...&page=...&limit=...
-[HttpGet("products")]
+        [HttpGet("products")]
 
-public async Task<IActionResult> GetProducts(
-    [FromQuery] string? cat   = null,
-    [FromQuery] string? q     = null,
-    [FromQuery] string? marque = null,   // nouveau
-    [FromQuery] decimal? pmin = null,    // nouveau
-    [FromQuery] decimal? pmax = null,    // nouveau
-    [FromQuery] string  tri   = "recent",// nouveau
-    [FromQuery] int     page  = 1,
-    [FromQuery] int     limit = 12)
-{
-    page  = Math.Max(1, page);
-    limit = Math.Clamp(limit, 1, 100);
+        public async Task<IActionResult> GetProducts(
+            [FromQuery] string? cat = null,
+            [FromQuery] string? q = null,
+            [FromQuery] string? marque = null,   // nouveau
+            [FromQuery] decimal? pmin = null,    // nouveau
+            [FromQuery] decimal? pmax = null,    // nouveau
+            [FromQuery] string tri = "recent",// nouveau
+            [FromQuery] int page = 1,
+            [FromQuery] int limit = 12)
+        {
+            page = Math.Max(1, page);
+            limit = Math.Clamp(limit, 1, 100);
 
-    var query = _context.Products
-        .Include(p => p.Category)
-        .Where(p => p.IsActive)
-        .AsQueryable();
+            var query = _context.Products
+                .Include(p => p.Category)
+                .Where(p => p.IsActive)
+                .AsQueryable();
 
-    if (!string.IsNullOrEmpty(cat))
-    {
-        var title = SlugToTitle.TryGetValue(cat, out var t) ? t : cat;
-        query = query.Where(p =>
-            p.Category != null &&
-            p.Category.Title.ToLower() == title.ToLower());
-    }
+            if (!string.IsNullOrEmpty(cat))
+            {
+                var title = SlugToTitle.TryGetValue(cat, out var t) ? t : cat;
+                query = query.Where(p =>
+                    p.Category != null &&
+                    p.Category.Title.ToLower() == title.ToLower());
+            }
 
-    if (!string.IsNullOrEmpty(q))
-        query = query.Where(p =>
-            p.Name.Contains(q) ||
-            p.Desc.Contains(q) ||
-            (p.Brand != null && p.Brand.Contains(q)));
+            if (!string.IsNullOrEmpty(q))
+                query = query.Where(p =>
+                    p.Name.Contains(q) ||
+                    p.Desc.Contains(q) ||
+                    (p.Brand != null && p.Brand.Contains(q)));
 
-    if (!string.IsNullOrEmpty(marque))
-        query = query.Where(p => p.Brand == marque);
+            if (!string.IsNullOrEmpty(marque))
+                query = query.Where(p => p.Brand == marque);
 
-    if (pmin.HasValue)
-        query = query.Where(p => p.Price >= pmin.Value);
+            if (pmin.HasValue)
+                query = query.Where(p => p.Price >= pmin.Value);
 
-    if (pmax.HasValue)
-        query = query.Where(p => p.Price <= pmax.Value);
+            if (pmax.HasValue)
+                query = query.Where(p => p.Price <= pmax.Value);
 
-    // Tri
-    query = tri switch {
-        "prix_asc"  => query.OrderBy(p => p.Price),
-        "prix_desc" => query.OrderByDescending(p => p.Price),
-        "note"      => query.OrderByDescending(p => p.Rating)
-                            .ThenByDescending(p => p.ReviewCount),
-        "promo"     => query.OrderByDescending(p => p.OldPrice - p.Price),
-        _           => query.OrderByDescending(p => p.CreatedAt), // recent
-    };
+            // Tri
+            query = tri switch
+            {
+                "prix_asc" => query.OrderBy(p => p.Price),
+                "prix_desc" => query.OrderByDescending(p => p.Price),
+                "note" => query.OrderByDescending(p => p.Rating)
+                                    .ThenByDescending(p => p.ReviewCount),
+                "promo" => query.OrderByDescending(p => p.OldPrice - p.Price),
+                _ => query.OrderByDescending(p => p.CreatedAt), // recent
+            };
 
-    var total = await query.CountAsync();
+            var total = await query.CountAsync();
 
-    var products = await query
-        .Skip((page - 1) * limit)
-        .Take(limit)
-        .ToListAsync();
+            var products = await query
+                .Skip((page - 1) * limit)
+                .Take(limit)
+                .ToListAsync();
 
-    // Marques disponibles pour la sidebar — sur le même filtre SANS filtre marque
-    var marqueQuery = _context.Products
-        .Include(p => p.Category)
-        .Where(p => p.IsActive && p.Brand != null && p.Brand != "");
+            // Marques disponibles pour la sidebar — sur le même filtre SANS filtre marque
+            var marqueQuery = _context.Products
+                .Include(p => p.Category)
+                .Where(p => p.IsActive && p.Brand != null && p.Brand != "");
 
-    if (!string.IsNullOrEmpty(cat))
-    {
-        var title = SlugToTitle.TryGetValue(cat, out var t) ? t : cat;
-        marqueQuery = marqueQuery.Where(p =>
-            p.Category != null &&
-            p.Category.Title.ToLower() == title.ToLower());
-    }
+            if (!string.IsNullOrEmpty(cat))
+            {
+                var title = SlugToTitle.TryGetValue(cat, out var t) ? t : cat;
+                marqueQuery = marqueQuery.Where(p =>
+                    p.Category != null &&
+                    p.Category.Title.ToLower() == title.ToLower());
+            }
 
-    var marques = await marqueQuery
-        .Select(p => p.Brand!)
-        .Distinct()
-        .OrderBy(m => m)
-        .ToListAsync();
+            var marques = await marqueQuery
+                .Select(p => p.Brand!)
+                .Distinct()
+                .OrderBy(m => m)
+                .ToListAsync();
 
-    return Ok(new
-    {
-        produits    = products.Select(FormatProduct),
-        total       = total,
-        page        = page,
-        pages       = (int)Math.Ceiling((double)total / limit),
-        marques     = marques,   // 👈 pour la sidebar marques
-    });
-}
+            return Ok(new
+            {
+                produits = products.Select(FormatProduct),
+                total = total,
+                page = page,
+                pages = (int)Math.Ceiling((double)total / limit),
+                marques = marques,   // 👈 pour la sidebar marques
+            });
+        }
 
         // ── SINGLE ─────────────────────────────────────────────────────
         // GET /api/ecom/products/3
@@ -203,27 +204,27 @@ public async Task<IActionResult> GetProducts(
             return Ok(new
             {
                 // Tous les champs PHP
-                id             = p.Id,
-                nom            = p.Name,
-                description    = p.Desc,
-                prix           = p.Price,
-                ancien_prix    = p.OldPrice,
-                stock          = p.Quantity,
-                categorie_id   = p.CategoryId,
-                categorie_nom  = p.Category?.Title ?? "",
+                id = p.Id,
+                nom = p.Name,
+                description = p.Desc,
+                prix = p.Price,
+                ancien_prix = p.OldPrice,
+                stock = p.Quantity,
+                categorie_id = p.CategoryId,
+                categorie_nom = p.Category?.Title ?? "",
                 categorie_slug = p.Category != null
                                     ? SlugFromTitle(p.Category.Title)
                                     : "",
-                marque         = p.Brand  ?? "",
-                badge          = p.Badge  ?? "",
-                note           = p.Rating,
-                nb_avis        = p.ReviewCount,
-                actif          = p.IsActive ? 1 : 0,
-                image          = AbsoluteImage(p.ImagePath),
-                created_at     = p.CreatedAt,
+                marque = p.Brand ?? "",
+                badge = p.Badge ?? "",
+                note = p.Rating,
+                nb_avis = p.ReviewCount,
+                actif = p.IsActive ? 1 : 0,
+                image = AbsoluteImage(p.ImagePath),
+                created_at = p.CreatedAt,
 
                 // Champs supplémentaires pour product.php
-                avis       = p.Reviews.Select(r => new
+                avis = p.Reviews.Select(r => new
                 {
                     r.Id,
                     r.Author,
@@ -231,45 +232,45 @@ public async Task<IActionResult> GetProducts(
                     r.Rating,
                     r.CreatedAt,
                     // Alias PHP
-                    auteur      = r.Author,
+                    auteur = r.Author,
                     commentaire = r.Comment,
-                    note        = r.Rating,
-                    created_at  = r.CreatedAt,
+                    note = r.Rating,
+                    created_at = r.CreatedAt,
                 }),
                 similaires = similaires.Select(FormatProduct),
             });
         }
 
-[HttpPost("reviews")]
-public async Task<IActionResult> PostReview([FromBody] ReviewDto dto)
-{
-    var product = await _context.Products.FindAsync(dto.ProductId);
-    if (product == null) return NotFound(new { erreur = "Produit introuvable" });
+        [HttpPost("reviews")]
+        public async Task<IActionResult> PostReview([FromBody] ReviewDto dto)
+        {
+            var product = await _context.Products.FindAsync(dto.ProductId);
+            if (product == null) return NotFound(new { erreur = "Produit introuvable" });
 
-    var review = new Review
-    {
-        ProductId = dto.ProductId,
-        Author    = dto.Author,
-        Rating    = dto.Rating,
-        Comment   = dto.Comment,
-    };
+            var review = new Review
+            {
+                ProductId = dto.ProductId,
+                Author = dto.Author,
+                Rating = dto.Rating,
+                Comment = dto.Comment,
+            };
 
-    _context.Reviews.Add(review);
+            _context.Reviews.Add(review);
 
-    // Recalculer la note moyenne du produit
-    var allReviews = await _context.Reviews
-        .Where(r => r.ProductId == dto.ProductId)
-        .ToListAsync();
-    allReviews.Add(review);
+            // Recalculer la note moyenne du produit
+            var allReviews = await _context.Reviews
+                .Where(r => r.ProductId == dto.ProductId)
+                .ToListAsync();
+            allReviews.Add(review);
 
-    product.Rating      = (float)allReviews.Average(r => r.Rating);
-    product.ReviewCount = allReviews.Count;
-    product.UpdatedAt   = DateTime.UtcNow;
+            product.Rating = (float)allReviews.Average(r => r.Rating);
+            product.ReviewCount = allReviews.Count;
+            product.UpdatedAt = DateTime.UtcNow;
 
-    await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
-    return Ok(new { succes = true, review.Id });
-}
+            return Ok(new { succes = true, review.Id });
+        }
 
         // ── TENDANCE ───────────────────────────────────────────────────
         // GET /api/ecom/products/tendance
@@ -287,7 +288,7 @@ public async Task<IActionResult> PostReview([FromBody] ReviewDto dto)
             return Ok(new
             {
                 produits = products.Select(FormatProduct),
-                total    = products.Count
+                total = products.Count
             });
         }
 
@@ -307,7 +308,7 @@ public async Task<IActionResult> PostReview([FromBody] ReviewDto dto)
             return Ok(new
             {
                 produits = products.Select(FormatProduct),
-                total    = products.Count
+                total = products.Count
             });
         }
 
@@ -322,20 +323,15 @@ public async Task<IActionResult> PostReview([FromBody] ReviewDto dto)
 
             var result = cats.Select((c, index) => new
             {
-                // Nomenclature .NET
-                c.Id,
-                c.Title,
-                c.CreatedAt,
-
-                // Nomenclature PHP — tout calculé, zéro migration
-                id          = c.Id,
-                nom         = c.Title,
-                slug        = SlugFromTitle(c.Title),
-                icone       = TitleToIcone.TryGetValue(c.Title, out var icone)
+                id = c.Id,
+                nom = c.Title,
+                slug = SlugFromTitle(c.Title),
+                icone = TitleToIcone.TryGetValue(c.Title, out var icone)
                                 ? icone
-                                : "fas fa-tag",              // icône par défaut
-                ordre       = index + 1,                     // ordre = position dans la liste
+                                : "fas fa-tag",
+                ordre = index + 1,
                 nb_produits = c.Products.Count(p => p.IsActive),
+                created_at = c.CreatedAt,
             });
 
             return Ok(result);
