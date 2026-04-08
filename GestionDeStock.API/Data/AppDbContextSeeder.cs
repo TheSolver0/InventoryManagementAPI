@@ -101,6 +101,23 @@ namespace GestionDeStock.API.Data
                     }
                 );
 
+                if (!await context.Users.AnyAsync())
+                {
+                    context.Users.Add(
+                        new User
+                        {
+                            Id = 1,
+                            Username = "lucfotso0",
+                            Email = "lucfotso0@gmail.com",
+                            PasswordHash = "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=",
+                            IsActive = true,
+                            CreatedAt = DateTime.UtcNow,
+                            UpdatedAt = DateTime.UtcNow
+                        }
+                    );
+                    await context.SaveChangesAsync();
+                }
+
                 await context.SaveChangesAsync();
             }
         }
@@ -108,4 +125,3 @@ namespace GestionDeStock.API.Data
     }
 }
 
-                
