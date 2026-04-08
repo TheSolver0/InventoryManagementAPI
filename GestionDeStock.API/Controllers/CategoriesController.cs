@@ -18,6 +18,7 @@ namespace GestionDeStock.API.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
         {
             var categories = await _context.Categories.ToListAsync();

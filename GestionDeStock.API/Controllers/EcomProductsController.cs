@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace GestionDeStock.API.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("api/ecom")]
     public class EcomController : ControllerBase
@@ -91,6 +90,7 @@ namespace GestionDeStock.API.Controllers
     
         // GET /api/ecom/products?cat=...&q=...&marque=...&pmin=...&pmax=...&tri=...&page=...&limit=...
 [HttpGet("products")]
+
 public async Task<IActionResult> GetProducts(
     [FromQuery] string? cat   = null,
     [FromQuery] string? q     = null,
