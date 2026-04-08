@@ -14,15 +14,31 @@ namespace GestionDeStock.API.Data
         public DbSet<Provide> Provides { get; set; }
         public DbSet<Movement> Movements { get; set; }
         public DbSet<StockMovement> StockMovements { get; set; }
-         public DbSet<InventorySession> InventorySessions { get; set; }
+        public DbSet<InventorySession> InventorySessions { get; set; }
         public DbSet<InventoryLine> InventoryLines { get; set; }
 
         public DbSet<Review> Reviews { get; set; }
         public DbSet<HeroSlide> HeroSlides { get; set; }
         public DbSet<User> Users { get; set; }
 
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            foreach (var entity in modelBuilder.Model.GetEntityTypes())
+            {
+                foreach (var prop in entity.GetProperties()
+                    .Where(p => p.ClrType == typeof(DateTime) || p.ClrType == typeof(DateTime?)))
+                {
+                    prop.SetColumnType("datetime");
+                }
+
+                foreach (var prop in entity.GetProperties()
+                    .Where(p => p.ClrType == typeof(decimal) || p.ClrType == typeof(decimal?)))
+                {
+                    prop.SetColumnType("decimal(10,2)");
+                }
+            }
+
             modelBuilder.Entity<User>(entity =>
             {
                 entity.HasKey(u => u.Id);
@@ -48,8 +64,8 @@ namespace GestionDeStock.API.Data
                 .HasMany(s => s.Products)
                 .WithMany(p => p.Suppliers)
                 .UsingEntity("SupplierProducts");
-            
-              // Configuration des relations
+
+            // Configuration des relations
             modelBuilder.Entity<InventoryLine>()
                 .HasOne(il => il.Session)
                 .WithMany(s => s.Lines)
@@ -61,7 +77,7 @@ namespace GestionDeStock.API.Data
                 .WithMany()
                 .HasForeignKey(il => il.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
-        
+
         }
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
