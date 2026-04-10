@@ -37,7 +37,17 @@ namespace GestionDeStock.API.Data
                 {
                     prop.SetColumnType("decimal(10,2)");
                 }
+                var idProperty = entity.GetProperties()
+                                        .FirstOrDefault(p => p.Name == "Id" && p.ClrType == typeof(int));
+
+                if (idProperty != null)
+                {
+                    idProperty.ValueGenerated = Microsoft.EntityFrameworkCore.Metadata.ValueGenerated.OnAdd;
+                    idProperty.SetColumnType("int");
+                    idProperty.SetIsUnicode(false);
+                }
             }
+
 
             modelBuilder.Entity<User>(entity =>
             {
