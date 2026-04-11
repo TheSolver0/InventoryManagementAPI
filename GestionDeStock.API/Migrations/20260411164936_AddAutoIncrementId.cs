@@ -27,17 +27,6 @@ namespace GestionDeStock.API.Migrations
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT");
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "Users",
-                type: "int",
-                unicode: false,
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
-
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
                 table: "Suppliers",
@@ -53,17 +42,6 @@ namespace GestionDeStock.API.Migrations
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT");
-
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "Suppliers",
-                type: "int",
-                unicode: false,
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
@@ -81,17 +59,6 @@ namespace GestionDeStock.API.Migrations
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT");
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "StockMovements",
-                type: "int",
-                unicode: false,
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
-
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
                 table: "Reviews",
@@ -99,17 +66,6 @@ namespace GestionDeStock.API.Migrations
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT");
-
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "Reviews",
-                type: "int",
-                unicode: false,
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
@@ -134,17 +90,6 @@ namespace GestionDeStock.API.Migrations
                 nullable: false,
                 oldClrType: typeof(decimal),
                 oldType: "TEXT");
-
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "Provides",
-                type: "int",
-                unicode: false,
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
@@ -179,17 +124,6 @@ namespace GestionDeStock.API.Migrations
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT");
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "Products",
-                type: "int",
-                unicode: false,
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
-
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
                 table: "Orders",
@@ -213,17 +147,6 @@ namespace GestionDeStock.API.Migrations
                 nullable: false,
                 oldClrType: typeof(decimal),
                 oldType: "TEXT");
-
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "Orders",
-                type: "int",
-                unicode: false,
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
@@ -249,17 +172,6 @@ namespace GestionDeStock.API.Migrations
                 oldClrType: typeof(decimal),
                 oldType: "TEXT",
                 oldNullable: true);
-
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "Movements",
-                type: "int",
-                unicode: false,
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "ValidatedDate",
@@ -293,17 +205,6 @@ namespace GestionDeStock.API.Migrations
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT");
-
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "InventorySessions",
-                type: "int",
-                unicode: false,
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
@@ -347,17 +248,6 @@ namespace GestionDeStock.API.Migrations
                 oldType: "TEXT",
                 oldNullable: true);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "InventoryLines",
-                type: "int",
-                unicode: false,
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
-
             migrationBuilder.AlterColumn<decimal>(
                 name: "Prix",
                 table: "HeroSlides",
@@ -375,17 +265,6 @@ namespace GestionDeStock.API.Migrations
                 oldType: "TEXT",
                 oldNullable: true);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "HeroSlides",
-                type: "int",
-                unicode: false,
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
-
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
                 table: "Customers",
@@ -402,17 +281,6 @@ namespace GestionDeStock.API.Migrations
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT");
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "Customers",
-                type: "int",
-                unicode: false,
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
-
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
                 table: "Categories",
@@ -428,17 +296,6 @@ namespace GestionDeStock.API.Migrations
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT");
-
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "Categories",
-                type: "int",
-                unicode: false,
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
         }
 
         /// <inheritdoc />
@@ -460,17 +317,6 @@ namespace GestionDeStock.API.Migrations
                 oldClrType: typeof(DateTime),
                 oldType: "datetime");
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "Users",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int",
-                oldUnicode: false)
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
-
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
                 table: "Suppliers",
@@ -486,17 +332,6 @@ namespace GestionDeStock.API.Migrations
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "datetime");
-
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "Suppliers",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int",
-                oldUnicode: false)
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
@@ -514,17 +349,6 @@ namespace GestionDeStock.API.Migrations
                 oldClrType: typeof(DateTime),
                 oldType: "datetime");
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "StockMovements",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int",
-                oldUnicode: false)
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
-
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
                 table: "Reviews",
@@ -532,17 +356,6 @@ namespace GestionDeStock.API.Migrations
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "datetime");
-
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "Reviews",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int",
-                oldUnicode: false)
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
@@ -567,17 +380,6 @@ namespace GestionDeStock.API.Migrations
                 nullable: false,
                 oldClrType: typeof(decimal),
                 oldType: "decimal(10,2)");
-
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "Provides",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int",
-                oldUnicode: false)
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
@@ -612,17 +414,6 @@ namespace GestionDeStock.API.Migrations
                 oldClrType: typeof(DateTime),
                 oldType: "datetime");
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "Products",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int",
-                oldUnicode: false)
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
-
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
                 table: "Orders",
@@ -646,17 +437,6 @@ namespace GestionDeStock.API.Migrations
                 nullable: false,
                 oldClrType: typeof(decimal),
                 oldType: "decimal(10,2)");
-
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "Orders",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int",
-                oldUnicode: false)
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
@@ -682,17 +462,6 @@ namespace GestionDeStock.API.Migrations
                 oldClrType: typeof(decimal),
                 oldType: "decimal(10,2)",
                 oldNullable: true);
-
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "Movements",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int",
-                oldUnicode: false)
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "ValidatedDate",
@@ -726,17 +495,6 @@ namespace GestionDeStock.API.Migrations
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "datetime");
-
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "InventorySessions",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int",
-                oldUnicode: false)
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
@@ -780,17 +538,6 @@ namespace GestionDeStock.API.Migrations
                 oldType: "datetime",
                 oldNullable: true);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "InventoryLines",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int",
-                oldUnicode: false)
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
-
             migrationBuilder.AlterColumn<decimal>(
                 name: "Prix",
                 table: "HeroSlides",
@@ -808,17 +555,6 @@ namespace GestionDeStock.API.Migrations
                 oldType: "decimal(10,2)",
                 oldNullable: true);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "HeroSlides",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int",
-                oldUnicode: false)
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
-
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
                 table: "Customers",
@@ -835,17 +571,6 @@ namespace GestionDeStock.API.Migrations
                 oldClrType: typeof(DateTime),
                 oldType: "datetime");
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "Customers",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int",
-                oldUnicode: false)
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
-
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
                 table: "Categories",
@@ -861,17 +586,6 @@ namespace GestionDeStock.API.Migrations
                 nullable: false,
                 oldClrType: typeof(DateTime),
                 oldType: "datetime");
-
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "Categories",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int",
-                oldUnicode: false)
-                .Annotation("Sqlite:Autoincrement", true)
-                .OldAnnotation("Sqlite:Autoincrement", true);
         }
     }
 }

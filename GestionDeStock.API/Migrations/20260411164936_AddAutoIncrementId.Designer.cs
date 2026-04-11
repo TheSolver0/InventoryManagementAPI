@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GestionDeStock.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260411164231_AddAutoIncrementId")]
+    [Migration("20260411164936_AddAutoIncrementId")]
     partial class AddAutoIncrementId
     {
         /// <inheritdoc />
@@ -24,8 +24,7 @@ namespace GestionDeStock.API.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .IsUnicode(false)
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime");
@@ -46,8 +45,7 @@ namespace GestionDeStock.API.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .IsUnicode(false)
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Address")
                         .IsRequired()
@@ -82,8 +80,7 @@ namespace GestionDeStock.API.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .IsUnicode(false)
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime?>("CountedAt")
                         .HasColumnType("datetime");
@@ -141,8 +138,7 @@ namespace GestionDeStock.API.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .IsUnicode(false)
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime");
@@ -189,8 +185,7 @@ namespace GestionDeStock.API.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .IsUnicode(false)
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<decimal?>("Amount")
                         .HasColumnType("decimal(10,2)");
@@ -231,8 +226,7 @@ namespace GestionDeStock.API.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .IsUnicode(false)
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(10,2)");
@@ -271,8 +265,7 @@ namespace GestionDeStock.API.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .IsUnicode(false)
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Badge")
                         .HasColumnType("TEXT");
@@ -340,8 +333,7 @@ namespace GestionDeStock.API.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .IsUnicode(false)
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(10,2)");
@@ -380,8 +372,7 @@ namespace GestionDeStock.API.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .IsUnicode(false)
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Author")
                         .IsRequired()
@@ -411,8 +402,7 @@ namespace GestionDeStock.API.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .IsUnicode(false)
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime");
@@ -455,8 +445,7 @@ namespace GestionDeStock.API.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .IsUnicode(false)
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Address")
                         .IsRequired()
@@ -491,8 +480,7 @@ namespace GestionDeStock.API.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .IsUnicode(false)
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime");
@@ -524,8 +512,7 @@ namespace GestionDeStock.API.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .IsUnicode(false)
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<decimal?>("AncienPrix")
                         .HasColumnType("decimal(10,2)");
