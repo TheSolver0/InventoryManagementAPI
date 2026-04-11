@@ -129,6 +129,13 @@ namespace GestionDeStock.API.Data
 
             return base.SaveChanges();
         }
+        protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+{
+    // Tous les int seront mappés en INTEGER dans SQLite automatiquement
+    configurationBuilder
+        .Properties<int>()
+        .HaveColumnType("INTEGER");
+}
 
     }
 }
