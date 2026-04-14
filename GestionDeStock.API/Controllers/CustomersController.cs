@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace GestionDeStock.API.Controllers
 {
-    [Authorize(Roles = Roles.AdminOrGerant)]
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class CustomersController(AppDbContext context) : ControllerBase
@@ -82,6 +82,7 @@ namespace GestionDeStock.API.Controllers
             return Ok(existingCustomer);
 
         }
+        [Authorize(Roles = Roles.AdminOrGerant)]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(int id)
         {
