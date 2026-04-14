@@ -1,3 +1,4 @@
+using GestionDeStock.API.Auth;
 using GestionDeStock.API.Models;
 using GestionDeStock.API.Dtos;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace GestionDeStock.API.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = Roles.AdminOrGerant)]
     [ApiController]
     [Route("api/[controller]")]
     public class MovementsController(AppDbContext context) : ControllerBase

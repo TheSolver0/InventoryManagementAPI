@@ -16,6 +16,7 @@ namespace GestionDeStock.API.Data
         public DbSet<StockMovement> StockMovements { get; set; }
         public DbSet<InventorySession> InventorySessions { get; set; }
         public DbSet<InventoryLine> InventoryLines { get; set; }
+        public DbSet<ProductImage> ProductImages { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<HeroSlide> HeroSlides { get; set; }
         public DbSet<User> Users { get; set; }
@@ -83,6 +84,12 @@ namespace GestionDeStock.API.Data
                 .HasMany(s => s.Products)
                 .WithMany(p => p.Suppliers)
                 .UsingEntity("SupplierProducts");
+
+            modelBuilder.Entity<ProductImage>()
+                .HasOne(pi => pi.Product)
+                .WithMany(p => p.Images)
+                .HasForeignKey(pi => pi.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<InventoryLine>()
                 .HasOne(il => il.Session)

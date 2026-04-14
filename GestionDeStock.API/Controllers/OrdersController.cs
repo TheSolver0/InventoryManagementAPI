@@ -1,3 +1,4 @@
+using GestionDeStock.API.Auth;
 using GestionDeStock.API.Models;
 using GestionDeStock.API.Dtos;
 using Microsoft.AspNetCore.Mvc;
@@ -86,6 +87,7 @@ namespace GestionDeStock.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = Roles.AdminOrGerant)]
         public async Task<ActionResult> UpdateOrder([FromBody] OrderDto orderDto, int id)
         {
             if (id != orderDto.Id)
@@ -130,6 +132,7 @@ namespace GestionDeStock.API.Controllers
             return Ok(existingOrder);
         }
         [HttpDelete("{id}")]
+        [Authorize(Roles = Roles.AdminOrGerant)]
         public async Task<IActionResult> DeleteOrder(int id)
         {
             var order = await _context.Orders.FindAsync(id);

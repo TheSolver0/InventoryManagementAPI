@@ -1,3 +1,5 @@
+using GestionDeStock.API.Models;
+
 namespace GestionDeStock.API.Dtos
 {
     public class RegisterDto
@@ -6,6 +8,8 @@ namespace GestionDeStock.API.Dtos
         public string Username { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public string ConfirmPassword { get; set; } = string.Empty;
+        /// <summary>Rôle assigné à la création. Réservé aux admins — ignoré si non fourni (défaut : Employe).</summary>
+        public UserRole? Role { get; set; }
     }
 
     public class LoginDto
@@ -27,6 +31,7 @@ namespace GestionDeStock.API.Dtos
         public int Id { get; set; }
         public string Email { get; set; } = string.Empty;
         public string Username { get; set; } = string.Empty;
+        public UserRole Role { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
     }

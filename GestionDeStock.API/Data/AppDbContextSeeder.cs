@@ -1,5 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using GestionDeStock.API.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace GestionDeStock.API.Data
 {
@@ -110,6 +110,7 @@ namespace GestionDeStock.API.Data
                             Username = "lucfotso0",
                             Email = "lucfotso0@gmail.com",
                             PasswordHash = "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=",
+                            Role = UserRole.Admin,
                             IsActive = true,
                             CreatedAt = DateTime.UtcNow,
                             UpdatedAt = DateTime.UtcNow

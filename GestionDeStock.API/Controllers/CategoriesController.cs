@@ -1,3 +1,4 @@
+using GestionDeStock.API.Auth;
 using GestionDeStock.API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -41,6 +42,7 @@ public async Task<ActionResult<Category>> CreateCategory([FromBody] Category cat
 }
 
 [HttpPut("{id}")]
+[Authorize(Roles = Roles.AdminOrGerant)]
 public async Task<IActionResult> UpdateCategory(int id, [FromBody] Category category)
 {
     if (id != category.Id) return BadRequest();
@@ -56,6 +58,7 @@ public async Task<IActionResult> UpdateCategory(int id, [FromBody] Category cate
 }
 
 [HttpDelete("{id}")]
+[Authorize(Roles = Roles.AdminOrGerant)]
 public async Task<IActionResult> DeleteCategory(int id)
 {
     var category = await _context.Categories

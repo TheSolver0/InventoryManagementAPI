@@ -1,3 +1,4 @@
+using GestionDeStock.API.Auth;
 using GestionDeStock.API.Models;
 using GestionDeStock.API.Dtos;
 using Microsoft.AspNetCore.Mvc;
@@ -22,33 +23,52 @@ namespace GestionDeStock.API.Controllers
             _imageService = imageService;
         }
 
-        // GET api/products — avec URL image absolue pour le site PHP
+        private object FormatProduct(Product p) => new
+        {
+            p.Id,
+            p.Name,
+            p.Desc,
+            p.CategoryId,
+            p.Category,
+            p.Quantity,
+            p.Price,
+            p.OldPrice,
+            p.Threshold,
+            p.Sku,
+            p.Location,
+            p.Brand,
+            p.Badge,
+            p.IsActive,
+            // Première image (principale) pour compatibilité
+            ImagePath = p.Images.FirstOrDefault(i => i.IsMain)?.ImagePath
+                     ?? p.Images.OrderBy(i => i.Order).FirstOrDefault()?.ImagePath
+                     ?? p.ImagePath,
+            ImageUrl = _imageService.BuildPublicUrl(Request,
+                           p.Images.FirstOrDefault(i => i.IsMain)?.ImagePath
+                        ?? p.Images.OrderBy(i => i.Order).FirstOrDefault()?.ImagePath
+                        ?? p.ImagePath),
+            Images = p.Images.OrderBy(i => i.Order).Select(img => new
+            {
+                img.Id,
+                img.ImagePath,
+                img.IsMain,
+                img.Order,
+                Url = _imageService.BuildPublicUrl(Request, img.ImagePath)
+            }),
+            p.CreatedAt,
+            p.UpdatedAt
+        };
+
+        // GET api/products
         [HttpGet]
         public async Task<ActionResult<IEnumerable<object>>> GetProducts()
         {
             var products = await _context.Products
                 .Include(p => p.Category)
+                .Include(p => p.Images)
                 .ToListAsync();
 
-            var result = products.Select(p => new
-            {
-                p.Id,
-                p.Name,
-                p.Desc,
-                p.CategoryId,
-                p.Category,
-                p.Quantity,
-                p.Price,
-                p.Threshold,
-                p.Sku,
-                p.Location,
-                p.ImagePath,
-                ImageUrl = _imageService.BuildPublicUrl(Request, p.ImagePath), //  URL absolue
-                p.CreatedAt,
-                p.UpdatedAt
-            });
-
-            return Ok(result);
+            return Ok(products.Select(FormatProduct));
         }
 
         [HttpGet("{id}")]
@@ -56,30 +76,15 @@ namespace GestionDeStock.API.Controllers
         {
             var p = await _context.Products
                 .Include(p => p.Category)
+                .Include(p => p.Images)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (p == null) return NotFound();
 
-            return Ok(new
-            {
-                p.Id,
-                p.Name,
-                p.Desc,
-                p.CategoryId,
-                p.Category,
-                p.Quantity,
-                p.Price,
-                p.Threshold,
-                p.Sku,
-                p.Location,
-                p.ImagePath,
-                ImageUrl = _imageService.BuildPublicUrl(Request, p.ImagePath),
-                p.CreatedAt,
-                p.UpdatedAt
-            });
+            return Ok(FormatProduct(p));
         }
 
-        // POST — multipart/form-data obligatoire pour l'image
+        // POST — multipart/form-data, champ "Images" accepte plusieurs fichiers
         [HttpPost]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> CreateProduct([FromForm] ProductDto dto)
@@ -91,10 +96,6 @@ namespace GestionDeStock.API.Controllers
                 var category = await _context.Categories.FindAsync(dto.CategoryId);
                 if (category == null) return BadRequest("Catégorie introuvable.");
 
-                var imagePath = dto.Image != null
-                    ? await _imageService.SaveImageAsync(dto.Image)
-                    : null;
-
                 var product = new Product
                 {
                     Id = 0,
@@ -104,22 +105,41 @@ namespace GestionDeStock.API.Controllers
                     Category = category,
                     Quantity = dto.Quantity,
                     Price = dto.Price,
+                    OldPrice = dto.OldPrice,
                     Threshold = dto.Threshold,
                     Sku = dto.Sku ?? string.Empty,
                     Location = dto.Location ?? string.Empty,
-                    ImagePath = imagePath,
+                    Brand = dto.Brand,
+                    Badge = dto.Badge,
+                    IsActive = dto.IsActive,
                 };
 
                 _context.Products.Add(product);
                 await _context.SaveChangesAsync();
 
-                return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, new
+                if (dto.Images != null && dto.Images.Count > 0)
                 {
-                    product.Id,
-                    product.Name,
-                    product.ImagePath,
-                    ImageUrl = _imageService.BuildPublicUrl(Request, product.ImagePath)
-                });
+                    for (int i = 0; i < dto.Images.Count; i++)
+                    {
+                        var path = await _imageService.SaveImageAsync(dto.Images[i]);
+                        if (path != null)
+                        {
+                            _context.ProductImages.Add(new ProductImage
+                            {
+                                ProductId = product.Id,
+                                ImagePath = path,
+                                IsMain = i == 0,
+                                Order = i
+                            });
+                        }
+                    }
+                    await _context.SaveChangesAsync();
+                }
+
+                // Recharger avec les images pour la réponse
+                await _context.Entry(product).Collection(p => p.Images).LoadAsync();
+
+                return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, FormatProduct(product));
             }
             catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
             catch (Exception ex)
@@ -128,20 +148,38 @@ namespace GestionDeStock.API.Controllers
             }
         }
 
-
         [HttpPut("{id}")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UpdateProduct(int id, [FromForm] ProductDto dto)
         {
-            var product = await _context.Products.FindAsync(id);
+            var product = await _context.Products
+                .Include(p => p.Images)
+                .FirstOrDefaultAsync(p => p.Id == id);
             if (product == null) return NotFound();
 
             try
             {
-                if (dto.Image != null)
+                // Si de nouvelles images sont fournies, remplacer toutes les existantes
+                if (dto.Images != null && dto.Images.Count > 0)
                 {
-                    _imageService.DeleteImage(product.ImagePath);
-                    product.ImagePath = await _imageService.SaveImageAsync(dto.Image);
+                    foreach (var img in product.Images)
+                        _imageService.DeleteImage(img.ImagePath);
+                    _context.ProductImages.RemoveRange(product.Images);
+
+                    for (int i = 0; i < dto.Images.Count; i++)
+                    {
+                        var path = await _imageService.SaveImageAsync(dto.Images[i]);
+                        if (path != null)
+                        {
+                            _context.ProductImages.Add(new ProductImage
+                            {
+                                ProductId = product.Id,
+                                ImagePath = path,
+                                IsMain = i == 0,
+                                Order = i
+                            });
+                        }
+                    }
                 }
 
                 product.Name = dto.Name;
@@ -149,35 +187,122 @@ namespace GestionDeStock.API.Controllers
                 product.CategoryId = dto.CategoryId;
                 product.Quantity = dto.Quantity;
                 product.Price = dto.Price;
+                product.OldPrice = dto.OldPrice;
                 product.Threshold = dto.Threshold;
-                product.Sku = dto.Sku ?? string.Empty;           // ✅ jamais null
-                product.Location = dto.Location ?? string.Empty; // ✅ jamais null
+                product.Sku = dto.Sku ?? string.Empty;
+                product.Location = dto.Location ?? string.Empty;
+                product.Brand = dto.Brand;
+                product.Badge = dto.Badge;
+                product.IsActive = dto.IsActive;
                 product.UpdatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
+                await _context.Entry(product).Collection(p => p.Images).LoadAsync();
 
-                return Ok(new
-                {
-                    product.Id,
-                    product.Name,
-                    product.ImagePath,
-                    ImageUrl = _imageService.BuildPublicUrl(Request, product.ImagePath)
-                });
+                return Ok(FormatProduct(product));
             }
             catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
             catch (Exception ex) { return StatusCode(500, ex.Message); }
         }
+
+        // POST api/products/{id}/images — ajouter des photos sans remplacer les existantes
+        [HttpPost("{id}/images")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> AddImages(int id, [FromForm] List<IFormFile> images)
+        {
+            var product = await _context.Products
+                .Include(p => p.Images)
+                .FirstOrDefaultAsync(p => p.Id == id);
+            if (product == null) return NotFound();
+
+            try
+            {
+                int nextOrder = product.Images.Any() ? product.Images.Max(i => i.Order) + 1 : 0;
+
+                foreach (var file in images)
+                {
+                    var path = await _imageService.SaveImageAsync(file);
+                    if (path != null)
+                    {
+                        _context.ProductImages.Add(new ProductImage
+                        {
+                            ProductId = product.Id,
+                            ImagePath = path,
+                            IsMain = !product.Images.Any(), // principale si c'est la première
+                            Order = nextOrder++
+                        });
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                await _context.Entry(product).Collection(p => p.Images).LoadAsync();
+
+                return Ok(FormatProduct(product));
+            }
+            catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+            catch (Exception ex) { return StatusCode(500, ex.Message); }
+        }
+
+        // DELETE api/products/{id}/images/{imageId} — supprimer une photo précise
+        [HttpDelete("{id}/images/{imageId}")]
+        [Authorize(Roles = Roles.AdminOrGerant)]
+        public async Task<IActionResult> DeleteImage(int id, int imageId)
+        {
+            var image = await _context.ProductImages
+                .FirstOrDefaultAsync(i => i.Id == imageId && i.ProductId == id);
+            if (image == null) return NotFound();
+
+            _imageService.DeleteImage(image.ImagePath);
+            _context.ProductImages.Remove(image);
+            await _context.SaveChangesAsync();
+
+            // Si l'image supprimée était la principale, promouvoir la suivante
+            if (image.IsMain)
+            {
+                var next = await _context.ProductImages
+                    .Where(i => i.ProductId == id)
+                    .OrderBy(i => i.Order)
+                    .FirstOrDefaultAsync();
+                if (next != null)
+                {
+                    next.IsMain = true;
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            return NoContent();
+        }
+
+        // PATCH api/products/{id}/images/{imageId}/main — définir comme image principale
+        [HttpPatch("{id}/images/{imageId}/main")]
+        public async Task<IActionResult> SetMainImage(int id, int imageId)
+        {
+            var images = await _context.ProductImages
+                .Where(i => i.ProductId == id)
+                .ToListAsync();
+
+            var target = images.FirstOrDefault(i => i.Id == imageId);
+            if (target == null) return NotFound();
+
+            foreach (var img in images)
+                img.IsMain = img.Id == imageId;
+
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
         [HttpDelete("{id}")]
+        [Authorize(Roles = Roles.AdminOrGerant)]
         public async Task<IActionResult> DeleteProduct(int id)
         {
             var product = await _context.Products
                 .Include(p => p.Suppliers)
                 .Include(p => p.Reviews)
+                .Include(p => p.Images)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (product == null) return NotFound();
 
-            // Supprimer toutes les relations
             var movements = await _context.Movements.Where(m => m.ProductId == id).ToListAsync();
             _context.Movements.RemoveRange(movements);
 
@@ -191,21 +316,27 @@ namespace GestionDeStock.API.Controllers
             _context.Provides.RemoveRange(provides);
 
             var inventoryLines = await _context.InventoryLines.Where(il => il.ProductId == id).ToListAsync();
-            _context.InventoryLines.RemoveRange(inventoryLines); // ✅ le vrai coupable
+            _context.InventoryLines.RemoveRange(inventoryLines);
 
             var reviews = await _context.Reviews.Where(r => r.ProductId == id).ToListAsync();
             _context.Reviews.RemoveRange(reviews);
 
             product.Suppliers.Clear();
 
+            // Supprimer les fichiers images du disque
+            foreach (var img in product.Images)
+                _imageService.DeleteImage(img.ImagePath);
+            // Les lignes ProductImages sont supprimées en cascade (DeleteBehavior.Cascade)
+
+            // Supprimer aussi l'ancienne image legacy si présente
+            _imageService.DeleteImage(product.ImagePath);
+
             await _context.SaveChangesAsync();
 
-            _imageService.DeleteImage(product.ImagePath);
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
     }
-
 }

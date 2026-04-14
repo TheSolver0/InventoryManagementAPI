@@ -16,6 +16,6 @@ namespace GestionDeStock.API.Dtos
         public float Rating { get; set; } = 0;
         public int ReviewCount { get; set; } = 0;
         public bool IsActive { get; set; } = true;
-        public IFormFile? Image { get; set; }
+        public List<IFormFile>? Images { get; set; }
     }
 }

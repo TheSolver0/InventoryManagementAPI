@@ -64,6 +64,13 @@ namespace GestionDeStock.API.Controllers
             return found.Key ?? TitleToSlug(title); // fallback auto-généré
         }
 
+        private string MainImage(Product p)
+        {
+            var main = p.Images.FirstOrDefault(i => i.IsMain)
+                    ?? p.Images.OrderBy(i => i.Order).FirstOrDefault();
+            return AbsoluteImage(main?.ImagePath ?? p.ImagePath);
+        }
+
         private object FormatProduct(Product p) => new
         {
             // ── Nomenclature PHP ───────────────────────────────────────
@@ -83,7 +90,8 @@ namespace GestionDeStock.API.Controllers
             note = p.Rating,
             nb_avis = p.ReviewCount,
             actif = p.IsActive ? 1 : 0,
-            image = AbsoluteImage(p.ImagePath),
+            image = MainImage(p),
+            images = p.Images.OrderBy(i => i.Order).Select(img => AbsoluteImage(img.ImagePath)).ToList(),
             created_at = p.CreatedAt,
         };
 
@@ -106,6 +114,7 @@ namespace GestionDeStock.API.Controllers
 
             var query = _context.Products
                 .Include(p => p.Category)
+                .Include(p => p.Images)
                 .Where(p => p.IsActive)
                 .AsQueryable();
 
@@ -187,6 +196,7 @@ namespace GestionDeStock.API.Controllers
             var p = await _context.Products
                 .Include(p => p.Category)
                 .Include(p => p.Reviews)
+                .Include(p => p.Images)
                 .FirstOrDefaultAsync(p => p.Id == id && p.IsActive);
 
             if (p == null)
@@ -195,6 +205,7 @@ namespace GestionDeStock.API.Controllers
             // Produits similaires (même catégorie, max 4)
             var similaires = await _context.Products
                 .Include(s => s.Category)
+                .Include(s => s.Images)
                 .Where(s => s.CategoryId == p.CategoryId
                          && s.Id != id
                          && s.IsActive)
@@ -220,7 +231,8 @@ namespace GestionDeStock.API.Controllers
                 note = p.Rating,
                 nb_avis = p.ReviewCount,
                 actif = p.IsActive ? 1 : 0,
-                image = AbsoluteImage(p.ImagePath),
+                image = MainImage(p),
+                images = p.Images.OrderBy(i => i.Order).Select(img => AbsoluteImage(img.ImagePath)).ToList(),
                 created_at = p.CreatedAt,
 
                 // Champs supplémentaires pour product.php
@@ -279,6 +291,7 @@ namespace GestionDeStock.API.Controllers
         {
             var products = await _context.Products
                 .Include(p => p.Category)
+                .Include(p => p.Images)
                 .Where(p => p.IsActive)
                 .OrderByDescending(p => p.ReviewCount)
                 .ThenByDescending(p => p.Rating)
@@ -299,6 +312,7 @@ namespace GestionDeStock.API.Controllers
         {
             var products = await _context.Products
                 .Include(p => p.Category)
+                .Include(p => p.Images)
                 .Where(p => p.IsActive)
                 .OrderByDescending(p => p.Rating)
                 .ThenByDescending(p => p.ReviewCount)

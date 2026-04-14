@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using GestionDeStock.API.Data;
@@ -32,62 +33,63 @@ namespace GestionDeStock.API.Services
         {
             try
             {
-                // Validation
-                if (string.IsNullOrWhiteSpace(registerDto.Email) || 
-                    string.IsNullOrWhiteSpace(registerDto.Username) || 
+                if (string.IsNullOrWhiteSpace(registerDto.Email) ||
+                    string.IsNullOrWhiteSpace(registerDto.Username) ||
                     string.IsNullOrWhiteSpace(registerDto.Password))
                 {
-                    return new AuthResponseDto 
-                    { 
-                        Success = false, 
-                        Message = "Email, username et mot de passe sont requis." 
+                    return new AuthResponseDto
+                    {
+                        Success = false,
+                        Message = "Email, username et mot de passe sont requis."
                     };
                 }
 
                 if (registerDto.Password != registerDto.ConfirmPassword)
                 {
-                    return new AuthResponseDto 
-                    { 
-                        Success = false, 
-                        Message = "Les mots de passe ne correspondent pas." 
+                    return new AuthResponseDto
+                    {
+                        Success = false,
+                        Message = "Les mots de passe ne correspondent pas."
                     };
                 }
 
                 if (registerDto.Password.Length < 6)
                 {
-                    return new AuthResponseDto 
-                    { 
-                        Success = false, 
-                        Message = "Le mot de passe doit contenir au moins 6 caractères." 
+                    return new AuthResponseDto
+                    {
+                        Success = false,
+                        Message = "Le mot de passe doit contenir au moins 6 caractères."
                     };
                 }
 
-                // Vérifier si l'email existe déjà
                 if (await _context.Users.AnyAsync(u => u.Email == registerDto.Email))
                 {
-                    return new AuthResponseDto 
-                    { 
-                        Success = false, 
-                        Message = "Cet email est déjà utilisé." 
+                    return new AuthResponseDto
+                    {
+                        Success = false,
+                        Message = "Cet email est déjà utilisé."
                     };
                 }
 
-                // Vérifier si le username existe déjà
                 if (await _context.Users.AnyAsync(u => u.Username == registerDto.Username))
                 {
-                    return new AuthResponseDto 
-                    { 
-                        Success = false, 
-                        Message = "Ce nom d'utilisateur est déjà utilisé." 
+                    return new AuthResponseDto
+                    {
+                        Success = false,
+                        Message = "Ce nom d'utilisateur est déjà utilisé."
                     };
                 }
 
-                // Créer le nouvel utilisateur
                 var user = new User
                 {
                     Email = registerDto.Email,
                     Username = registerDto.Username,
                     PasswordHash = HashPassword(registerDto.Password),
+                    // Le rôle fourni est accepté seulement si c'est le 1er utilisateur (admin initial).
+                    // Sinon, un admin doit assigner les rôles via /api/users/{id}.
+                    Role = await _context.Users.AnyAsync()
+                        ? UserRole.Employe
+                        : (registerDto.Role ?? UserRole.Admin),
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
@@ -96,7 +98,7 @@ namespace GestionDeStock.API.Services
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"Utilisateur enregistré: {user.Email}");
+                _logger.LogInformation("Utilisateur enregistré: {Email} avec le rôle {Role}", user.Email, user.Role);
 
                 var token = GenerateJwtToken(user);
 
@@ -105,23 +107,16 @@ namespace GestionDeStock.API.Services
                     Success = true,
                     Message = "Enregistrement réussi.",
                     Token = token,
-                    User = new UserDto
-                    {
-                        Id = user.Id,
-                        Email = user.Email,
-                        Username = user.Username,
-                        IsActive = user.IsActive,
-                        CreatedAt = user.CreatedAt
-                    }
+                    User = ToDto(user)
                 };
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Erreur lors de l'enregistrement: {ex.Message}");
-                return new AuthResponseDto 
-                { 
-                    Success = false, 
-                    Message = ex.Message 
+                _logger.LogError("Erreur lors de l'enregistrement: {Message}", ex.Message);
+                return new AuthResponseDto
+                {
+                    Success = false,
+                    Message = ex.Message
                 };
             }
         }
@@ -130,38 +125,36 @@ namespace GestionDeStock.API.Services
         {
             try
             {
-                // Validation
                 if (string.IsNullOrWhiteSpace(loginDto.Email) || string.IsNullOrWhiteSpace(loginDto.Password))
                 {
-                    return new AuthResponseDto 
-                    { 
-                        Success = false, 
-                        Message = "Email et mot de passe sont requis." 
+                    return new AuthResponseDto
+                    {
+                        Success = false,
+                        Message = "Email et mot de passe sont requis."
                     };
                 }
 
-                // Chercher l'utilisateur
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDto.Email);
 
                 if (user == null || !VerifyPassword(loginDto.Password, user.PasswordHash))
                 {
-                    return new AuthResponseDto 
-                    { 
-                        Success = false, 
-                        Message = "Email ou mot de passe incorrect." 
+                    return new AuthResponseDto
+                    {
+                        Success = false,
+                        Message = "Email ou mot de passe incorrect."
                     };
                 }
 
                 if (!user.IsActive)
                 {
-                    return new AuthResponseDto 
-                    { 
-                        Success = false, 
-                        Message = "Cet utilisateur est inactif." 
+                    return new AuthResponseDto
+                    {
+                        Success = false,
+                        Message = "Ce compte est désactivé. Contactez un administrateur."
                     };
                 }
 
-                _logger.LogInformation($"Utilisateur connecté: {user.Email}");
+                _logger.LogInformation("Utilisateur connecté: {Email} ({Role})", user.Email, user.Role);
 
                 var token = GenerateJwtToken(user);
 
@@ -170,23 +163,16 @@ namespace GestionDeStock.API.Services
                     Success = true,
                     Message = "Connexion réussie.",
                     Token = token,
-                    User = new UserDto
-                    {
-                        Id = user.Id,
-                        Email = user.Email,
-                        Username = user.Username,
-                        IsActive = user.IsActive,
-                        CreatedAt = user.CreatedAt
-                    }
+                    User = ToDto(user)
                 };
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Erreur lors de la connexion: {ex.Message}");
-                return new AuthResponseDto 
-                { 
-                    Success = false, 
-                    Message = "Une erreur s'est produite lors de la connexion." 
+                _logger.LogError("Erreur lors de la connexion: {Message}", ex.Message);
+                return new AuthResponseDto
+                {
+                    Success = false,
+                    Message = "Une erreur s'est produite lors de la connexion."
                 };
             }
         }
@@ -197,34 +183,43 @@ namespace GestionDeStock.API.Services
                 _configuration["JwtSettings:Key"] ?? throw new InvalidOperationException("JWT Key not configured")));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
+            var claims = new[]
+            {
+                new Claim("id",       user.Id.ToString()),
+                new Claim("email",    user.Email),
+                new Claim("username", user.Username),
+                // ClaimTypes.Role est lu automatiquement par [Authorize(Roles = "...")]
+                new Claim(ClaimTypes.Role, user.Role.ToString())
+            };
+
             var token = new JwtSecurityToken(
                 issuer: _configuration["JwtSettings:Issuer"],
                 audience: _configuration["JwtSettings:Audience"],
-                claims: new[]
-                {
-                    new System.Security.Claims.Claim("id", user.Id.ToString()),
-                    new System.Security.Claims.Claim("email", user.Email),
-                    new System.Security.Claims.Claim("username", user.Username)
-                },
-                expires: DateTime.UtcNow.AddHours(int.Parse(_configuration["JwtSettings:ExpirationHours"] ?? "24")),
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(
+                    int.Parse(_configuration["JwtSettings:ExpirationHours"] ?? "24")),
                 signingCredentials: creds);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        private string HashPassword(string password)
+        private static UserDto ToDto(User user) => new()
         {
-            using (var sha256 = SHA256.Create())
-            {
-                var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-                return Convert.ToBase64String(hash);
-            }
+            Id = user.Id,
+            Email = user.Email,
+            Username = user.Username,
+            Role = user.Role,
+            IsActive = user.IsActive,
+            CreatedAt = user.CreatedAt
+        };
+
+        private static string HashPassword(string password)
+        {
+            var hash = SHA256.HashData(Encoding.UTF8.GetBytes(password));
+            return Convert.ToBase64String(hash);
         }
 
-        private bool VerifyPassword(string password, string hash)
-        {
-            var hashOfInput = HashPassword(password);
-            return hashOfInput == hash;
-        }
+        private static bool VerifyPassword(string password, string hash) =>
+            HashPassword(password) == hash;
     }
 }

@@ -1,3 +1,4 @@
+using GestionDeStock.API.Auth;
 using Microsoft.AspNetCore.Mvc;
 using GestionDeStock.API.Services;
 using GestionDeStock.API.Models;
@@ -55,6 +56,7 @@ namespace GestionDeStock.API.Controllers
         /// Crée un nouveau mouvement de stock manuellement
         /// </summary>
         [HttpPost]
+        [Authorize(Roles = Roles.AdminOrGerant)]
         public async Task<IActionResult> Create([FromBody] StockMovement movement)
         {
             try
