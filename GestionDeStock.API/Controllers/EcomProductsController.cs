@@ -71,6 +71,20 @@ namespace GestionDeStock.API.Controllers
             return AbsoluteImage(main?.ImagePath ?? p.ImagePath);
         }
 
+        private List<string> AllImages(Product p)
+        {
+            if (p.Images.Count > 0)
+                return p.Images.OrderBy(i => i.Order)
+                               .Select(img => AbsoluteImage(img.ImagePath))
+                               .ToList();
+
+            // Fallback sur l'image legacy
+            if (!string.IsNullOrEmpty(p.ImagePath))
+                return [AbsoluteImage(p.ImagePath)];
+
+            return [];
+        }
+
         private object FormatProduct(Product p) => new
         {
             // ── Nomenclature PHP ───────────────────────────────────────
@@ -91,7 +105,7 @@ namespace GestionDeStock.API.Controllers
             nb_avis = p.ReviewCount,
             actif = p.IsActive ? 1 : 0,
             image = MainImage(p),
-            images = p.Images.OrderBy(i => i.Order).Select(img => AbsoluteImage(img.ImagePath)).ToList(),
+            images = AllImages(p),
             created_at = p.CreatedAt,
         };
 
@@ -232,7 +246,7 @@ namespace GestionDeStock.API.Controllers
                 nb_avis = p.ReviewCount,
                 actif = p.IsActive ? 1 : 0,
                 image = MainImage(p),
-                images = p.Images.OrderBy(i => i.Order).Select(img => AbsoluteImage(img.ImagePath)).ToList(),
+                images = AllImages(p),
                 created_at = p.CreatedAt,
 
                 // Champs supplémentaires pour product.php
