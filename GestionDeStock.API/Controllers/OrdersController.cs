@@ -87,7 +87,7 @@ namespace GestionDeStock.API.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = Roles.AdminOrGerant)]
+        // [Authorize(Roles = Roles.AdminOrGerant)]
         public async Task<ActionResult> UpdateOrder([FromBody] OrderDto orderDto, int id)
         {
             if (id != orderDto.Id)
