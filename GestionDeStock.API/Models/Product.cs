@@ -26,5 +26,6 @@ namespace GestionDeStock.API.Models
         public List<ProductImage> Images { get; set; } = new();
         public List<Supplier> Suppliers { get; set; } = new();
         public List<Review> Reviews { get; set; } = new();
+        public List<ProductDiscount> Discounts { get; set; } = new();
     }
 }

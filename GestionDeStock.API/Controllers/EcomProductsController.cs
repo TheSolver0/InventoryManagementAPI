@@ -85,46 +85,98 @@ namespace GestionDeStock.API.Controllers
             return [];
         }
 
-        private object FormatProduct(Product p) => new
+        // Charge les remises actives pour une liste de produits (une seule requête DB)
+        private async Task<Dictionary<int, List<ProductDiscount>>> GetActiveDiscountsMap(
+            IEnumerable<int> productIds)
         {
-            // ── Nomenclature PHP ───────────────────────────────────────
-            id = p.Id,
-            nom = p.Name,
-            description = p.Desc,
-            prix = p.Price,
-            ancien_prix = p.OldPrice,
-            stock = p.Quantity,
-            categorie_id = p.CategoryId,
-            categorie_nom = p.Category?.Title ?? "",
-            categorie_slug = p.Category != null
-                                ? SlugFromTitle(p.Category.Title)
-                                : "",
-            marque = p.Brand ?? "",
-            badge = p.Badge ?? "",
-            note = p.Rating,
-            nb_avis = p.ReviewCount,
-            actif = p.IsActive ? 1 : 0,
-            image = MainImage(p),
-            images = AllImages(p),
-            created_at = p.CreatedAt,
-        };
+            var now = DateTime.UtcNow;
+            var discounts = await _context.ProductDiscounts
+                .Include(d => d.Event)
+                .Where(d => productIds.Contains(d.ProductId)
+                         && d.IsActive
+                         && d.StartDate <= now
+                         && d.EndDate >= now
+                         && (d.Event == null || (d.Event.IsActive
+                                              && d.Event.StartDate <= now
+                                              && d.Event.EndDate >= now)))
+                .ToListAsync();
+
+            return discounts
+                .GroupBy(d => d.ProductId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+        }
+
+        private object FormatProduct(Product p, Dictionary<int, List<ProductDiscount>>? discountsMap = null)
+        {
+            var activeDiscounts = discountsMap?.GetValueOrDefault(p.Id) ?? [];
+            var prixRemise = activeDiscounts.Count > 0
+                ? PromotionEventsController.ApplyDiscounts(p.Price, activeDiscounts)
+                : p.Price;
+            var enPromo = prixRemise < p.Price;
+
+            return new
+            {
+                // ── Nomenclature PHP ───────────────────────────────────────
+                id = p.Id,
+                nom = p.Name,
+                description = p.Desc,
+                prix = p.Price,
+                ancien_prix = p.OldPrice,
+                stock = p.Quantity,
+                categorie_id = p.CategoryId,
+                categorie_nom = p.Category?.Title ?? "",
+                categorie_slug = p.Category != null
+                                    ? SlugFromTitle(p.Category.Title)
+                                    : "",
+                marque = p.Brand ?? "",
+                badge = p.Badge ?? "",
+                note = p.Rating,
+                nb_avis = p.ReviewCount,
+                actif = p.IsActive ? 1 : 0,
+                image = MainImage(p),
+                images = AllImages(p),
+                created_at = p.CreatedAt,
+
+                // ── Champs promotions ──────────────────────────────────────
+                en_promo = enPromo,
+                prix_remise = enPromo ? prixRemise : (decimal?)null,
+                pourcentage_remise = enPromo && p.Price > 0
+                    ? Math.Round((1 - prixRemise / p.Price) * 100, 1)
+                    : (decimal?)null,
+                evenements_actifs = activeDiscounts
+                    .Where(d => d.Event != null)
+                    .Select(d => d.Event!)
+                    .DistinctBy(e => e.Id)
+                    .Select(e => new
+                    {
+                        id = e.Id,
+                        nom = e.Name,
+                        badge = e.BadgeLabel,
+                        bg_color = e.BgColor,
+                        text_color = e.TextColor,
+                    })
+                    .ToList(),
+            };
+        }
 
 
-        // GET /api/ecom/products?cat=...&q=...&marque=...&pmin=...&pmax=...&tri=...&page=...&limit=...
+        // GET /api/ecom/products?cat=...&q=...&marque=...&pmin=...&pmax=...&tri=...&promo=...&event=...&page=...&limit=...
         [HttpGet("products")]
-
         public async Task<IActionResult> GetProducts(
             [FromQuery] string? cat = null,
             [FromQuery] string? q = null,
-            [FromQuery] string? marque = null,   // nouveau
-            [FromQuery] decimal? pmin = null,    // nouveau
-            [FromQuery] decimal? pmax = null,    // nouveau
-            [FromQuery] string tri = "recent",// nouveau
+            [FromQuery] string? marque = null,
+            [FromQuery] decimal? pmin = null,
+            [FromQuery] decimal? pmax = null,
+            [FromQuery] string tri = "recent",
+            [FromQuery] bool? promo = null,    // filtrer produits en promotion
+            [FromQuery] int? eventId = null,   // filtrer par événement
             [FromQuery] int page = 1,
             [FromQuery] int limit = 12)
         {
             page = Math.Max(1, page);
             limit = Math.Clamp(limit, 1, 100);
+            var now = DateTime.UtcNow;
 
             var query = _context.Products
                 .Include(p => p.Category)
@@ -155,15 +207,27 @@ namespace GestionDeStock.API.Controllers
             if (pmax.HasValue)
                 query = query.Where(p => p.Price <= pmax.Value);
 
+            // Filtre : seulement les produits en promo active
+            if (promo == true)
+                query = query.Where(p => _context.ProductDiscounts.Any(d =>
+                    d.ProductId == p.Id && d.IsActive && d.StartDate <= now && d.EndDate >= now &&
+                    (d.Event == null || (d.Event.IsActive && d.Event.StartDate <= now && d.Event.EndDate >= now))));
+
+            // Filtre : produits appartenant à un événement précis
+            if (eventId.HasValue)
+                query = query.Where(p => _context.ProductDiscounts.Any(d =>
+                    d.ProductId == p.Id && d.EventId == eventId.Value
+                    && d.IsActive && d.StartDate <= now && d.EndDate >= now));
+
             // Tri
             query = tri switch
             {
-                "prix_asc" => query.OrderBy(p => p.Price),
+                "prix_asc"  => query.OrderBy(p => p.Price),
                 "prix_desc" => query.OrderByDescending(p => p.Price),
-                "note" => query.OrderByDescending(p => p.Rating)
+                "note"      => query.OrderByDescending(p => p.Rating)
                                     .ThenByDescending(p => p.ReviewCount),
-                "promo" => query.OrderByDescending(p => p.OldPrice - p.Price),
-                _ => query.OrderByDescending(p => p.CreatedAt), // recent
+                "promo"     => query.OrderByDescending(p => p.OldPrice - p.Price),
+                _           => query.OrderByDescending(p => p.CreatedAt), // recent
             };
 
             var total = await query.CountAsync();
@@ -173,7 +237,10 @@ namespace GestionDeStock.API.Controllers
                 .Take(limit)
                 .ToListAsync();
 
-            // Marques disponibles pour la sidebar — sur le même filtre SANS filtre marque
+            // Charger les remises actives pour ces produits
+            var discountsMap = await GetActiveDiscountsMap(products.Select(p => p.Id));
+
+            // Marques disponibles pour la sidebar
             var marqueQuery = _context.Products
                 .Include(p => p.Category)
                 .Where(p => p.IsActive && p.Brand != null && p.Brand != "");
@@ -194,11 +261,11 @@ namespace GestionDeStock.API.Controllers
 
             return Ok(new
             {
-                produits = products.Select(FormatProduct),
-                total = total,
-                page = page,
+                produits = products.Select(p => FormatProduct(p, discountsMap)),
+                total,
+                page,
                 pages = (int)Math.Ceiling((double)total / limit),
-                marques = marques,   // 👈 pour la sidebar marques
+                marques,
             });
         }
 
@@ -216,6 +283,8 @@ namespace GestionDeStock.API.Controllers
             if (p == null)
                 return NotFound(new { erreur = "Produit introuvable" });
 
+            var discountsMap = await GetActiveDiscountsMap([p.Id]);
+
             // Produits similaires (même catégorie, max 4)
             var similaires = await _context.Products
                 .Include(s => s.Category)
@@ -225,6 +294,16 @@ namespace GestionDeStock.API.Controllers
                          && s.IsActive)
                 .Take(4)
                 .ToListAsync();
+
+            var similairesDiscounts = await GetActiveDiscountsMap(similaires.Select(s => s.Id));
+
+            // Récupérer le détail des remises actives pour affichage
+            var now = DateTime.UtcNow;
+            var activeDiscounts = discountsMap.GetValueOrDefault(p.Id) ?? [];
+            var prixRemise = activeDiscounts.Count > 0
+                ? PromotionEventsController.ApplyDiscounts(p.Price, activeDiscounts)
+                : p.Price;
+            var enPromo = prixRemise < p.Price;
 
             return Ok(new
             {
@@ -249,6 +328,29 @@ namespace GestionDeStock.API.Controllers
                 images = AllImages(p),
                 created_at = p.CreatedAt,
 
+                // Promotions
+                en_promo = enPromo,
+                prix_remise = enPromo ? prixRemise : (decimal?)null,
+                pourcentage_remise = enPromo && p.Price > 0
+                    ? Math.Round((1 - prixRemise / p.Price) * 100, 1)
+                    : (decimal?)null,
+                remises_actives = activeDiscounts.Select(d => new
+                {
+                    d.Id,
+                    discountType = d.DiscountType.ToString(),
+                    d.DiscountValue,
+                    d.StartDate,
+                    d.EndDate,
+                    evenement = d.Event == null ? null : new
+                    {
+                        id = d.Event.Id,
+                        nom = d.Event.Name,
+                        badge = d.Event.BadgeLabel,
+                        bg_color = d.Event.BgColor,
+                        text_color = d.Event.TextColor,
+                    },
+                }),
+
                 // Champs supplémentaires pour product.php
                 avis = p.Reviews.Select(r => new
                 {
@@ -263,7 +365,7 @@ namespace GestionDeStock.API.Controllers
                     note = r.Rating,
                     created_at = r.CreatedAt,
                 }),
-                similaires = similaires.Select(FormatProduct),
+                similaires = similaires.Select(s => FormatProduct(s, similairesDiscounts)),
             });
         }
 
@@ -312,9 +414,11 @@ namespace GestionDeStock.API.Controllers
                 .Take(8)
                 .ToListAsync();
 
+            var discountsMap = await GetActiveDiscountsMap(products.Select(p => p.Id));
+
             return Ok(new
             {
-                produits = products.Select(FormatProduct),
+                produits = products.Select(p => FormatProduct(p, discountsMap)),
                 total = products.Count
             });
         }
@@ -333,9 +437,11 @@ namespace GestionDeStock.API.Controllers
                 .Take(5)
                 .ToListAsync();
 
+            var discountsMap = await GetActiveDiscountsMap(products.Select(p => p.Id));
+
             return Ok(new
             {
-                produits = products.Select(FormatProduct),
+                produits = products.Select(p => FormatProduct(p, discountsMap)),
                 total = products.Count
             });
         }
@@ -367,20 +473,38 @@ namespace GestionDeStock.API.Controllers
 
         // ── HERO SLIDES ────────────────────────────────────────────────
         // GET /api/ecom/hero
-        // Les hero slides ne sont pas liés au stock → ils restent en DB PHP
-        // Cet endpoint les proxifie juste pour uniformiser les appels côté JS
         [HttpGet("hero")]
         public IActionResult GetHero()
         {
-            // Option A : retourner vide si pas encore migré
             return Ok(Array.Empty<object>());
+        }
 
-            // Option B (plus tard) : quand HeroSlide sera dans votre DbContext :
-            // var slides = await _context.HeroSlides
-            //     .Where(h => h.IsActive)
-            //     .OrderBy(h => h.Ordre)
-            //     .ToListAsync();
-            // return Ok(slides);
+        // ── ÉVÉNEMENTS ACTIFS (raccourci ecom) ─────────────────────────
+        // GET /api/ecom/events
+        [HttpGet("events")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetActiveEvents()
+        {
+            var now = DateTime.UtcNow;
+            var events = await _context.PromotionEvents
+                .Where(e => e.IsActive && e.StartDate <= now && e.EndDate >= now)
+                .OrderBy(e => e.EndDate)
+                .Select(e => new
+                {
+                    id = e.Id,
+                    nom = e.Name,
+                    description = e.Description,
+                    bannerImage = _imageService.BuildPublicUrl(Request, e.BannerImage),
+                    badge = e.BadgeLabel,
+                    bg_color = e.BgColor,
+                    text_color = e.TextColor,
+                    start_date = e.StartDate,
+                    end_date = e.EndDate,
+                    nb_produits = e.Discounts.Count(d => d.IsActive),
+                })
+                .ToListAsync();
+
+            return Ok(events);
         }
     }
 }

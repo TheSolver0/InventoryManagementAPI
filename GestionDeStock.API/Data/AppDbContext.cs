@@ -20,6 +20,8 @@ namespace GestionDeStock.API.Data
         public DbSet<Review> Reviews { get; set; }
         public DbSet<HeroSlide> HeroSlides { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<PromotionEvent> PromotionEvents { get; set; }
+        public DbSet<ProductDiscount> ProductDiscounts { get; set; }
 
         
 
@@ -102,6 +104,18 @@ namespace GestionDeStock.API.Data
                 .WithMany()
                 .HasForeignKey(il => il.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ProductDiscount>()
+                .HasOne(d => d.Product)
+                .WithMany(p => p.Discounts)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ProductDiscount>()
+                .HasOne(d => d.Event)
+                .WithMany(e => e.Discounts)
+                .HasForeignKey(d => d.EventId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
